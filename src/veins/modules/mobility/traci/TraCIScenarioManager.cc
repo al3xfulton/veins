@@ -308,6 +308,8 @@ void TraCIScenarioManager::initialize(int stage)
 
     cc = FindModule<BaseConnectionManager*>::findGlobalModule();
 
+    vehicleObstacleControl = FindModule<VehicleObstacleControl*>::findGlobalModule();
+
     ASSERT(firstStepAt > connectAt);
     connectAndStartTrigger = new cMessage("connect");
     scheduleAt(connectAt, connectAndStartTrigger);
@@ -613,10 +615,20 @@ void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::
     mod->callInitialize();
     hosts[nodeId] = mod;
 
+    double length = getCommandInterface()->vehicle(nodeId).getLength();
+    double height = getCommandInterface()->vehicle(nodeId).getHeight();
+    double width = getCommandInterface()->vehicle(nodeId).getWidth();
+
     // post-initialize TraCIMobility
     auto mobilityModules = getSubmodulesOfType<TraCIMobility>(mod);
     for (auto mm : mobilityModules) {
         mm->changePosition();
+
+        if (vehicleObstacleControl) {
+            double offset = mm->getAntennaPositionOffset();
+            const VehicleObstacle* vo = vehicleObstacleControl->add(VehicleObstacle(mm, length, offset, width, height));
+            vehicleObstacles[mm] = vo;
+        }
     }
 
     emit(traciModuleAddedSignal, mod);
@@ -644,6 +656,16 @@ void TraCIScenarioManager::deleteManagedModule(std::string nodeId)
     cModule* nic = mod->getSubmodule("nic");
     if (cc && nic) {
         cc->unregisterNic(nic);
+    }
+    if (vehicleObstacleControl) {
+        for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
+            cModule* submod = *iter;
+            TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
+            if (!mm) continue;
+            auto vo = vehicleObstacles.find(mm);
+            ASSERT(vo != vehicleObstacles.end());
+            vehicleObstacleControl->erase(vo->second);
+        }
     }
 
     hosts.erase(nodeId);
