@@ -1,5 +1,5 @@
-#ifndef Waymart_H
-#define Waymart_H
+#ifndef Waymart11p_H
+#define Waymart11p_H
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 

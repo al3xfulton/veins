@@ -1,6 +1,6 @@
 #include "veins/modules/application/traci/Waymart.h"
 
-Define_Module(TraCIDemo11p);
+Define_Module(Waymart11p);
 
 void Waymart11p::initialize(int stage) {
     BaseWaveApplLayer::initialize(stage);
