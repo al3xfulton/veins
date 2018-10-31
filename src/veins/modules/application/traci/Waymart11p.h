@@ -17,7 +17,7 @@
  *
  */
 
-class Waymart11p : public BaseWaveApplLayer {
+class Waymart11p : public Veins::BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
 	protected:
