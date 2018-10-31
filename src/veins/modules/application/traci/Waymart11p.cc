@@ -11,18 +11,18 @@ void Waymart11p::initialize(int stage) {
     }
 }
 
-void Waymart11p::onWSA(WaveServiceAdvertisment* wsa) {
+void Waymart11p::onWSA(Veins::WaveServiceAdvertisment* wsa) {
     if (currentSubscribedServiceId == -1) {
         mac->changeServiceChannel(wsa->getTargetChannel());
         currentSubscribedServiceId = wsa->getPsid();
         if  (currentOfferedServiceId != wsa->getPsid()) {
             stopService();
-            startService((Channels::ChannelNumber) wsa->getTargetChannel(), wsa->getPsid(), "Mirrored Traffic Service");
+            startService((Veins::Channels::ChannelNumber) wsa->getTargetChannel(), wsa->getPsid(), "Mirrored Traffic Service");
         }
     }
 }
 
-void Waymart11p::onWSM(WaveShortMessage* wsm) {
+void Waymart11p::onWSM(Veins::WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
     if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
@@ -36,7 +36,7 @@ void Waymart11p::onWSM(WaveShortMessage* wsm) {
 }
 
 void Waymart11p::handleSelfMsg(cMessage* msg) {
-    if (WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg)) {
+    if (Veins::WaveShortMessage* wsm = dynamic_cast<Veins::WaveShortMessage*>(msg)) {
         //send this message on the service channel until the counter is 3 or higher.
         //this code only runs when channel switching is enabled
         sendDown(wsm->dup());
@@ -64,13 +64,13 @@ void Waymart11p::handlePositionUpdate(cObject* obj) {
             findHost()->getDisplayString().updateWith("r=16,red");
             sentMessage = true;
 
-            WaveShortMessage* wsm = new WaveShortMessage();
+            Veins::WaveShortMessage* wsm = new Veins::WaveShortMessage();
             populateWSM(wsm);
             wsm->setWsmData(mobility->getRoadId().c_str());
 
             //host is standing still due to crash
             if (dataOnSch) {
-                startService(Channels::SCH2, 42, "Traffic Information Service");
+                startService(Veins::Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later
                 scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
             }

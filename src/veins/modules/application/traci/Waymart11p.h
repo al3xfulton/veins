@@ -28,8 +28,8 @@ class Waymart11p : public Veins::BaseWaveApplLayer {
         virtual void onWSM(Veins::WaveShortMessage* wsm);
         virtual void onWSA(Veins::WaveServiceAdvertisment* wsa);
 
-        virtual void handleSelfMsg(Veins::cMessage* msg);
-		virtual void handlePositionUpdate(Veins::cObject* obj);
+        virtual void handleSelfMsg(cMessage* msg);
+		virtual void handlePositionUpdate(cObject* obj);
 };
 
 #endif
