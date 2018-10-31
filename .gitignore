@@ -60,3 +60,5 @@ subprojects/veins_inet/examples/**/.tkenvrc
 subprojects/veins_inet/examples/**/.qtenvrc
 subprojects/veins_inet/examples/**/.cmdenv-log
 subprojects/veins_inet/examples/**/valgrind.out
+
+*.DS_Store
