@@ -164,6 +164,19 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 			scheduleAt(simTime() + accidentInterval, startAccidentMsg);
 		}
 	}
+	else if(msg == startFakeAccidentMsg) {
+		//Need some good way to trigger the messages being sent
+		this->savedRoadPosition = this->road_id;
+		simtime_t fakeAccidentDuration = par("fakeAccidentDuration");
+		scheduleAt(simTime() + fakeAccidentDuration, stopFakeAccidentMsg);
+		accidentCount--;
+	}
+	else if (msg == stopFakeAccidentMsg){
+		if (fakeAccidentCount > 0) {
+			simtime_t fakeAccidentInterval = par("fakeAccidentInterval");
+			scheduleAt(simTime() + fakeAccidentInterval, startFakeAccidentMsg);
+		}
+	}
 }
 
 void TraCIMobility::preInitialize(std::string external_id, const Coord& position, std::string road_id, double speed, double angle)
