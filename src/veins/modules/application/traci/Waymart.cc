@@ -56,7 +56,6 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 }
 
 void Waymart::handleSelfMsg(cMessage* msg) {
-    mobility->setSavedRoadId(mobility->getRoadId);
     if (WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg)) {
         //send this message on the service channel until the counter is 3 or higher.
         //this code only runs when channel switching is enabled

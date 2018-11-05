@@ -167,7 +167,7 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	}
 	else if(msg == startFakeAccidentMsg) {
 		//Need some good way to trigger the messages being sent
-		this->savedRoadPosition = this->roadPosition;
+		this->savedRoadId = this->road_id;
 		simtime_t fakeAccidentDuration = par("fakeAccidentDuration");
 		scheduleAt(simTime() + fakeAccidentDuration, stopFakeAccidentMsg);
 		accidentCount--;
