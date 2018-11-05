@@ -56,6 +56,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 }
 
 void Waymart::handleSelfMsg(cMessage* msg) {
+    mobility->setSavedRoadId(mobility->getRoadId);
     if (WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg)) {
         //send this message on the service channel until the counter is 3 or higher.
         //this code only runs when channel switching is enabled
@@ -104,15 +105,13 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         lastDroveAt = simTime();
         // no crash - check for trigger for fake crash
         if (mobility->getFakeState() == 1){
-            if(mobility->getSavedRoadPosition() == -1{
-                mobility->setSavedRoadPosition(mobility->getRoadId);
-            }
+
             findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
             sentMessage = true;
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
-            wsm->setWsmData(mobility->getSavedRoadPosition().c_str());
+            wsm->setWsmData(mobility->getSavedRoadId().c_str());
 
             // I have no idea what this means
             if (dataOnSch) {

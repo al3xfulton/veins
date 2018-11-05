@@ -131,12 +131,11 @@ class TraCIMobility : public BaseMobility
 		virtual double getFakeState() const {
 			return fakeState;
 		}
-		virtual Coord getSavedRoadPosition() const{
-			if (savedRoadPosition == -1) throw cRuntimeError("TraCIMobility::getSavedRoadPositions called with no fake accident tirggered");
-			return savedRoadPosition;
+		virtual Coord getSavedRoadId() const{
+			return savedRoadId;
 		}
-		virtual void setSavedRoadPosition(Coord pos) {
-			savedRoadPosition = pos;
+		virtual void setSavedRoadId(std::string id) {
+			savedRoadId = id;
 			return;
 		}
 
@@ -178,7 +177,7 @@ class TraCIMobility : public BaseMobility
 		bool isParking;
 
 		int fakeAccidentCount;
-		Coord savedRoadPosition; /**< saved on first call to send message pulled from nextPosition() */
+		std::string savedRoadId; /**< saved on first call to send message pulled from nextPosition() */
 		cMessage* startFakeAccidentMsg;
 		cMessage* stopFakeAccidentMsg;
 		double fakeState;
