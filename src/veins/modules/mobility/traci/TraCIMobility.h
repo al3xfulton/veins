@@ -133,6 +133,7 @@ class TraCIMobility : public BaseMobility
 	protected:
 		bool debug; /**< whether to emit debug messages */
 		int accidentCount; /**< number of accidents */
+		
 
 		cOutVector currentPosXVec; /**< vector plotting posx */
 		cOutVector currentPosYVec; /**< vector plotting posy */
@@ -164,6 +165,11 @@ class TraCIMobility : public BaseMobility
 		const static simsignalwrap_t parkingStateChangedSignal;
 
 		bool isParking;
+
+		int fakeAccidentCount;
+		Coord savedRoadPosition; /**< position of front bumper, updated by nextPosition() */
+		cMessage* startFakeAccidentMsg;
+		cMessage* stopFakeAccidentMsg;
 
 
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */

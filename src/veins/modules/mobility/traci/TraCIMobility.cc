@@ -101,16 +101,29 @@ void TraCIMobility::initialize(int stage)
 
 		isParking = false;
 
+		fakeAccidentCount = par("fakeAccidentCount");
+
+
 		startAccidentMsg = 0;
 		stopAccidentMsg = 0;
 		manager = 0;
 		last_speed = -1;
+
+		startFakeAccidentMsg = 0;
+		stopFakeAccidentMsg = 0;
+
 
 		if (accidentCount > 0) {
 			simtime_t accidentStart = par("accidentStart");
 			startAccidentMsg = new cMessage("scheduledAccident");
 			stopAccidentMsg = new cMessage("scheduledAccidentResolved");
 			scheduleAt(simTime() + accidentStart, startAccidentMsg);
+		}
+		if (fakeAccidentCount > 0){
+			simtime_t fakeAccidentStart = par("fakeAccidentStart");
+			startFakeAccidentMsg = new cMessage("scheduledFakeAccident");
+			stopFakeAccidentMsg = new cMessage("scheduledFakeAccidentResolved");
+			scheduleAt(simTime() + fakeAccidentStart, startFakeAccidentMsg);
 		}
 	}
 	else if (stage == 1)
