@@ -131,7 +131,7 @@ class TraCIMobility : public BaseMobility
 		virtual double getFakeState() const {
 			return fakeState;
 		}
-		virtual Coord getSavedRoadId() const{
+		virtual std::string getSavedRoadId() const{
 			return savedRoadId;
 		}
 		virtual void setSavedRoadId(std::string id) {
