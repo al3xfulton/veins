@@ -128,6 +128,17 @@ class TraCIMobility : public BaseMobility
 			if (!vehicleCommandInterface) vehicleCommandInterface = new TraCICommandInterface::Vehicle(getCommandInterface()->vehicle(getExternalId()));
 			return vehicleCommandInterface;
 		}
+		virtual double getFakeState() const {
+			return fakeState;
+		}
+		virtual Coord getSavedRoadPosition() const{
+			if (savedRoadPosition == -1) throw cRuntimeError("TraCIMobility::getSavedRoadPositions called with no fake accident tirggered");
+			return savedRoadPosition;
+		}
+		virtual void setSavedRoadPosition(Coord pos) {
+			savedRoadPosition = pos;
+			return;
+		}
 
 
 	protected:
@@ -167,9 +178,10 @@ class TraCIMobility : public BaseMobility
 		bool isParking;
 
 		int fakeAccidentCount;
-		Coord savedRoadPosition; /**< position of front bumper, updated by nextPosition() */
+		Coord savedRoadPosition; /**< saved on first call to send message pulled from nextPosition() */
 		cMessage* startFakeAccidentMsg;
 		cMessage* stopFakeAccidentMsg;
+		double fakeState;
 
 
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */

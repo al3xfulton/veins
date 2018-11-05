@@ -78,7 +78,7 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
 
-    // stopped for for at least 10s?
+    // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {
         if (simTime() - lastDroveAt >= 10 && sentMessage == false) {
             findHost()->getDisplayString().updateWith("r=16,red");
@@ -102,5 +102,28 @@ void Waymart::handlePositionUpdate(cObject* obj) {
     }
     else {
         lastDroveAt = simTime();
+        // no crash - check for trigger for fake crash
+        if (mobility->getFakeState() == 1){
+            if(mobility->getSavedRoadPosition() == -1{
+                mobility->setSavedRoadPosition(mobility->getRoadId);
+            }
+            findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
+            sentMessage = true;
+
+            WaveShortMessage* wsm = new WaveShortMessage();
+            populateWSM(wsm);
+            wsm->setWsmData(mobility->getSavedRoadPosition().c_str());
+
+            // I have no idea what this means
+            if (dataOnSch) {
+                startService(Channels::SCH2, 42, "Traffic Information Service");
+                //started service and server advertising, schedule message to self to send later
+                scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+            }
+            else {
+                //send right away on CCH, because channel switching is disabled
+                sendDown(wsm);
+            }
+        }
     }
 }

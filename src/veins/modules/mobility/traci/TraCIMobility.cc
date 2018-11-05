@@ -102,6 +102,8 @@ void TraCIMobility::initialize(int stage)
 		isParking = false;
 
 		fakeAccidentCount = par("fakeAccidentCount");
+		fakeState = 0;
+		savedRoadPosition = -1;
 
 
 		startAccidentMsg = 0;
