@@ -18,8 +18,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#ifndef TraCIDemo11p_H
-#define TraCIDemo11p_H
+#ifndef Waymart_H
+#define Waymart_H
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 
@@ -37,7 +37,7 @@
  *
  */
 
-class TraCIDemo11p : public BaseWaveApplLayer {
+class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
 	protected:

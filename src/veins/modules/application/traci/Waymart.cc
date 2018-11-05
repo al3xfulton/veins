@@ -18,11 +18,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "veins/modules/application/traci/TraCIDemo11p.h"
+#include "veins/modules/application/traci/Waymart.h"
 
-Define_Module(TraCIDemo11p);
+Define_Module(Waymart);
 
-void TraCIDemo11p::initialize(int stage) {
+void Waymart::initialize(int stage) {
     BaseWaveApplLayer::initialize(stage);
     if (stage == 0) {
         sentMessage = false;
@@ -31,7 +31,7 @@ void TraCIDemo11p::initialize(int stage) {
     }
 }
 
-void TraCIDemo11p::onWSA(WaveServiceAdvertisment* wsa) {
+void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
     if (currentSubscribedServiceId == -1) {
         mac->changeServiceChannel(wsa->getTargetChannel());
         currentSubscribedServiceId = wsa->getPsid();
@@ -42,7 +42,7 @@ void TraCIDemo11p::onWSA(WaveServiceAdvertisment* wsa) {
     }
 }
 
-void TraCIDemo11p::onWSM(WaveShortMessage* wsm) {
+void Waymart::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
     if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
@@ -55,7 +55,7 @@ void TraCIDemo11p::onWSM(WaveShortMessage* wsm) {
     }
 }
 
-void TraCIDemo11p::handleSelfMsg(cMessage* msg) {
+void Waymart::handleSelfMsg(cMessage* msg) {
     if (WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg)) {
         //send this message on the service channel until the counter is 3 or higher.
         //this code only runs when channel switching is enabled
@@ -75,7 +75,7 @@ void TraCIDemo11p::handleSelfMsg(cMessage* msg) {
     }
 }
 
-void TraCIDemo11p::handlePositionUpdate(cObject* obj) {
+void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
 
     // stopped for for at least 10s?
