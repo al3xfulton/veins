@@ -1,14 +1,14 @@
 version 2
-run Default-0-20181102-15:22:21-2794
+run Default-0-20181106-00:07:52-3550
 attr configname Default
-attr datetime 20181102-15:22:21
+attr datetime 20181106-00:07:52
 attr experiment Default
 attr inifile omnetppW.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network way1
-attr processid 2794
+attr processid 3550
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -37,7 +37,7 @@ param *.**.nic.phy80211p.thermalNoise -110dBm
 param *.**.nic.phy80211p.decider "xmldoc(\"config.xml\")"
 param *.**.nic.phy80211p.analogueModels "xmldoc(\"config.xml\")"
 param *.**.nic.phy80211p.usePropagationDelay true
-param *.node[*].applType "\"TraCIDemo11p\""
+param *.node[*].applType "\"Waymart\""
 param *.node[*].appl.headerLength "80 bit"
 param *.node[*].appl.sendBeacons false
 param *.node[*].appl.dataOnSch false
@@ -48,44 +48,71 @@ param *.node[*].veinsmobilityType.debug true
 param *.node[*].veinsmobility.x 0
 param *.node[*].veinsmobility.y 0
 param *.node[*].veinsmobility.z 1.895
-param *.node[*0].veinsmobility.accidentCount 1
-param *.node[*0].veinsmobility.accidentStart 60s
-param *.node[*0].veinsmobility.accidentDuration 60s
+param *.node[*1].veinsmobility.fakeAccidentCount 1
+param *.node[*1].veinsmobility.fakeAccidentStart 70s
+param *.node[*1].veinsmobility.fakeAccidentDuration 40s
 
-scalar way1.node[1].appl generatedWSMs 1
-scalar way1.node[1].appl receivedWSMs 3
+scalar way1.node[0].appl generatedWSMs 1
+scalar way1.node[0].appl receivedWSMs 2
+scalar way1.node[0].appl generatedBSMs 0
+scalar way1.node[0].appl receivedBSMs 0
+scalar way1.node[0].appl generatedWSAs 0
+scalar way1.node[0].appl receivedWSAs 0
+scalar way1.node[0].nic.phy80211p busyTime 4.3364485981308e-06
+scalar way1.node[0].nic.mac1609_4 ReceivedUnicastPackets 0
+scalar way1.node[0].nic.mac1609_4 ReceivedBroadcasts 2
+scalar way1.node[0].nic.mac1609_4 SentPackets 1
+scalar way1.node[0].nic.mac1609_4 SentAcknowledgements 0
+scalar way1.node[0].nic.mac1609_4 SNIRLostPackets 0
+scalar way1.node[0].nic.mac1609_4 RXTXLostPackets 0
+scalar way1.node[0].nic.mac1609_4 TotalLostPackets 0
+scalar way1.node[0].nic.mac1609_4 DroppedPacketsInMac 0
+scalar way1.node[0].nic.mac1609_4 TooLittleTime 0
+scalar way1.node[0].nic.mac1609_4 TimesIntoBackoff 1
+scalar way1.node[0].nic.mac1609_4 SlotsBackoff 2
+scalar way1.node[0].nic.mac1609_4 NumInternalContention 0
+scalar way1.node[0].nic.mac1609_4 totalBusyTime 0.000697
+scalar way1.node[0].veinsmobility startTime 1
+scalar way1.node[0].veinsmobility totalTime 106
+scalar way1.node[0].veinsmobility stopTime 108
+scalar way1.node[0].veinsmobility minSpeed 1.8865424470045
+scalar way1.node[0].veinsmobility maxSpeed 30.98695261692
+scalar way1.node[0].veinsmobility totalDistance 2119.4713957933
+scalar way1.node[0].veinsmobility totalCO2Emission 487.02054095378
+scalar way1.node[1].appl generatedWSMs 2
+scalar way1.node[1].appl receivedWSMs 2
 scalar way1.node[1].appl generatedBSMs 0
 scalar way1.node[1].appl receivedBSMs 0
 scalar way1.node[1].appl generatedWSAs 0
 scalar way1.node[1].appl receivedWSAs 0
-scalar way1.node[1].nic.phy80211p busyTime 5.1555555555556e-06
+scalar way1.node[1].nic.phy80211p busyTime 4.1428571428571e-06
 scalar way1.node[1].nic.mac1609_4 ReceivedUnicastPackets 0
-scalar way1.node[1].nic.mac1609_4 ReceivedBroadcasts 3
-scalar way1.node[1].nic.mac1609_4 SentPackets 1
+scalar way1.node[1].nic.mac1609_4 ReceivedBroadcasts 2
+scalar way1.node[1].nic.mac1609_4 SentPackets 2
 scalar way1.node[1].nic.mac1609_4 SentAcknowledgements 0
 scalar way1.node[1].nic.mac1609_4 SNIRLostPackets 0
 scalar way1.node[1].nic.mac1609_4 RXTXLostPackets 0
 scalar way1.node[1].nic.mac1609_4 TotalLostPackets 0
 scalar way1.node[1].nic.mac1609_4 DroppedPacketsInMac 0
 scalar way1.node[1].nic.mac1609_4 TooLittleTime 0
-scalar way1.node[1].nic.mac1609_4 TimesIntoBackoff 1
+scalar way1.node[1].nic.mac1609_4 TimesIntoBackoff 2
 scalar way1.node[1].nic.mac1609_4 SlotsBackoff 3
 scalar way1.node[1].nic.mac1609_4 NumInternalContention 0
-scalar way1.node[1].nic.mac1609_4 totalBusyTime 0.000929
-scalar way1.node[1].veinsmobility startTime 21
-scalar way1.node[1].veinsmobility totalTime 134
-scalar way1.node[1].veinsmobility stopTime 156
-scalar way1.node[1].veinsmobility minSpeed 1.5441806555958
-scalar way1.node[1].veinsmobility maxSpeed 29.106801486945
-scalar way1.node[1].veinsmobility totalDistance 2257.1920479809
-scalar way1.node[1].veinsmobility totalCO2Emission 576.45340040352
+scalar way1.node[1].nic.mac1609_4 totalBusyTime 0.00093
+scalar way1.node[1].veinsmobility startTime 11
+scalar way1.node[1].veinsmobility totalTime 111
+scalar way1.node[1].veinsmobility stopTime 123
+scalar way1.node[1].veinsmobility minSpeed 2.1003037793096
+scalar way1.node[1].veinsmobility maxSpeed 29.108781094801
+scalar way1.node[1].veinsmobility totalDistance 2122.5329546618
+scalar way1.node[1].veinsmobility totalCO2Emission 471.7922443029
 scalar way1.node[2].appl generatedWSMs 1
 scalar way1.node[2].appl receivedWSMs 3
 scalar way1.node[2].appl generatedBSMs 0
 scalar way1.node[2].appl receivedBSMs 0
 scalar way1.node[2].appl generatedWSAs 0
 scalar way1.node[2].appl receivedWSAs 0
-scalar way1.node[2].nic.phy80211p busyTime 5.0071942446043e-06
+scalar way1.node[2].nic.phy80211p busyTime 4.8333333333333e-06
 scalar way1.node[2].nic.mac1609_4 ReceivedUnicastPackets 0
 scalar way1.node[2].nic.mac1609_4 ReceivedBroadcasts 3
 scalar way1.node[2].nic.mac1609_4 SentPackets 1
@@ -96,50 +123,23 @@ scalar way1.node[2].nic.mac1609_4 TotalLostPackets 0
 scalar way1.node[2].nic.mac1609_4 DroppedPacketsInMac 0
 scalar way1.node[2].nic.mac1609_4 TooLittleTime 0
 scalar way1.node[2].nic.mac1609_4 TimesIntoBackoff 1
-scalar way1.node[2].nic.mac1609_4 SlotsBackoff 1
+scalar way1.node[2].nic.mac1609_4 SlotsBackoff 2
 scalar way1.node[2].nic.mac1609_4 NumInternalContention 0
 scalar way1.node[2].nic.mac1609_4 totalBusyTime 0.000929
 scalar way1.node[2].veinsmobility startTime 31
-scalar way1.node[2].veinsmobility totalTime 138
-scalar way1.node[2].veinsmobility stopTime 170
-scalar way1.node[2].veinsmobility minSpeed 1.5610938670114
-scalar way1.node[2].veinsmobility maxSpeed 28.606924895911
-scalar way1.node[2].veinsmobility totalDistance 2265.1157281479
-scalar way1.node[2].veinsmobility totalCO2Emission 569.41657571864
-scalar way1.node[0].appl generatedWSMs 1
-scalar way1.node[0].appl receivedWSMs 3
-scalar way1.node[0].appl generatedBSMs 0
-scalar way1.node[0].appl receivedBSMs 0
-scalar way1.node[0].appl generatedWSAs 0
-scalar way1.node[0].appl receivedWSAs 0
-scalar way1.node[0].nic.phy80211p busyTime 4.046511627907e-06
-scalar way1.node[0].nic.mac1609_4 ReceivedUnicastPackets 0
-scalar way1.node[0].nic.mac1609_4 ReceivedBroadcasts 3
-scalar way1.node[0].nic.mac1609_4 SentPackets 1
-scalar way1.node[0].nic.mac1609_4 SentAcknowledgements 0
-scalar way1.node[0].nic.mac1609_4 SNIRLostPackets 0
-scalar way1.node[0].nic.mac1609_4 RXTXLostPackets 0
-scalar way1.node[0].nic.mac1609_4 TotalLostPackets 0
-scalar way1.node[0].nic.mac1609_4 DroppedPacketsInMac 0
-scalar way1.node[0].nic.mac1609_4 TooLittleTime 0
-scalar way1.node[0].nic.mac1609_4 TimesIntoBackoff 1
-scalar way1.node[0].nic.mac1609_4 SlotsBackoff 1
-scalar way1.node[0].nic.mac1609_4 NumInternalContention 0
-scalar way1.node[0].nic.mac1609_4 totalBusyTime 0.000929
-scalar way1.node[0].veinsmobility startTime 1
-scalar way1.node[0].veinsmobility totalTime 171
-scalar way1.node[0].veinsmobility stopTime 173
-scalar way1.node[0].veinsmobility minSpeed 0
-scalar way1.node[0].veinsmobility maxSpeed 30.929081168927
-scalar way1.node[0].veinsmobility totalDistance 2126.9892010218
-scalar way1.node[0].veinsmobility totalCO2Emission 611.84473740752
+scalar way1.node[2].veinsmobility totalTime 143
+scalar way1.node[2].veinsmobility stopTime 175
+scalar way1.node[2].veinsmobility minSpeed 2.413640728849
+scalar way1.node[2].veinsmobility maxSpeed 28.552888406293
+scalar way1.node[2].veinsmobility totalDistance 2269.7311682606
+scalar way1.node[2].veinsmobility totalCO2Emission 616.90048018933
 scalar way1.node[3].appl generatedWSMs 1
 scalar way1.node[3].appl receivedWSMs 2
 scalar way1.node[3].appl generatedBSMs 0
 scalar way1.node[3].appl receivedBSMs 0
 scalar way1.node[3].appl generatedWSAs 0
 scalar way1.node[3].appl receivedWSAs 0
-scalar way1.node[3].nic.phy80211p busyTime 3.3623188405797e-06
+scalar way1.node[3].nic.phy80211p busyTime 3.2e-06
 scalar way1.node[3].nic.mac1609_4 ReceivedUnicastPackets 0
 scalar way1.node[3].nic.mac1609_4 ReceivedBroadcasts 2
 scalar way1.node[3].nic.mac1609_4 SentPackets 1
@@ -150,42 +150,42 @@ scalar way1.node[3].nic.mac1609_4 TotalLostPackets 0
 scalar way1.node[3].nic.mac1609_4 DroppedPacketsInMac 0
 scalar way1.node[3].nic.mac1609_4 TooLittleTime 0
 scalar way1.node[3].nic.mac1609_4 TimesIntoBackoff 1
-scalar way1.node[3].nic.mac1609_4 SlotsBackoff 3
+scalar way1.node[3].nic.mac1609_4 SlotsBackoff 1
 scalar way1.node[3].nic.mac1609_4 NumInternalContention 0
 scalar way1.node[3].nic.mac1609_4 totalBusyTime 0.000697
-scalar way1.node[3].veinsmobility startTime 51
-scalar way1.node[3].veinsmobility totalTime 137
-scalar way1.node[3].veinsmobility stopTime 189
-scalar way1.node[3].veinsmobility minSpeed 1.7754437308991
-scalar way1.node[3].veinsmobility maxSpeed 28.101725816778
-scalar way1.node[3].veinsmobility totalDistance 2248.6934504451
-scalar way1.node[3].veinsmobility totalCO2Emission 553.84845913776
-scalar way1.node[4].appl generatedWSMs 0
-scalar way1.node[4].appl receivedWSMs 0
+scalar way1.node[3].veinsmobility startTime 41
+scalar way1.node[3].veinsmobility totalTime 144
+scalar way1.node[3].veinsmobility stopTime 186
+scalar way1.node[3].veinsmobility minSpeed 1.4269468483282
+scalar way1.node[3].veinsmobility maxSpeed 28.199841992352
+scalar way1.node[3].veinsmobility totalDistance 2267.6800496095
+scalar way1.node[3].veinsmobility totalCO2Emission 591.95621292289
+scalar way1.node[4].appl generatedWSMs 1
+scalar way1.node[4].appl receivedWSMs 1
 scalar way1.node[4].appl generatedBSMs 0
 scalar way1.node[4].appl receivedBSMs 0
 scalar way1.node[4].appl generatedWSAs 0
 scalar way1.node[4].appl receivedWSAs 0
-scalar way1.node[4].nic.phy80211p busyTime 0
+scalar way1.node[4].nic.phy80211p busyTime 1.4320987654321e-06
 scalar way1.node[4].nic.mac1609_4 ReceivedUnicastPackets 0
-scalar way1.node[4].nic.mac1609_4 ReceivedBroadcasts 0
-scalar way1.node[4].nic.mac1609_4 SentPackets 0
+scalar way1.node[4].nic.mac1609_4 ReceivedBroadcasts 1
+scalar way1.node[4].nic.mac1609_4 SentPackets 1
 scalar way1.node[4].nic.mac1609_4 SentAcknowledgements 0
 scalar way1.node[4].nic.mac1609_4 SNIRLostPackets 0
 scalar way1.node[4].nic.mac1609_4 RXTXLostPackets 0
 scalar way1.node[4].nic.mac1609_4 TotalLostPackets 0
 scalar way1.node[4].nic.mac1609_4 DroppedPacketsInMac 0
 scalar way1.node[4].nic.mac1609_4 TooLittleTime 0
-scalar way1.node[4].nic.mac1609_4 TimesIntoBackoff 0
-scalar way1.node[4].nic.mac1609_4 SlotsBackoff 0
+scalar way1.node[4].nic.mac1609_4 TimesIntoBackoff 1
+scalar way1.node[4].nic.mac1609_4 SlotsBackoff 2
 scalar way1.node[4].nic.mac1609_4 NumInternalContention 0
-scalar way1.node[4].nic.mac1609_4 totalBusyTime 0
-scalar way1.node[4].veinsmobility startTime 91
-scalar way1.node[4].veinsmobility totalTime 131
-scalar way1.node[4].veinsmobility stopTime 223
-scalar way1.node[4].veinsmobility minSpeed 1.4580121515319
-scalar way1.node[4].veinsmobility maxSpeed 24.520437574643
-scalar way1.node[4].veinsmobility totalDistance 2131.6985922904
-scalar way1.node[4].veinsmobility totalCO2Emission 451.53430655404
+scalar way1.node[4].nic.mac1609_4 totalBusyTime 0.000465
+scalar way1.node[4].veinsmobility startTime 81
+scalar way1.node[4].veinsmobility totalTime 161
+scalar way1.node[4].veinsmobility stopTime 243
+scalar way1.node[4].veinsmobility minSpeed 1.357091268315
+scalar way1.node[4].veinsmobility maxSpeed 24.461045588461
+scalar way1.node[4].veinsmobility totalDistance 2280.5440090168
+scalar way1.node[4].veinsmobility totalCO2Emission 539.43226689477
 scalar way1.manager roiArea 0
 

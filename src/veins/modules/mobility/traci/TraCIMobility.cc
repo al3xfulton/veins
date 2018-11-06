@@ -146,6 +146,8 @@ void TraCIMobility::finish()
 
 	cancelAndDelete(startAccidentMsg);
 	cancelAndDelete(stopAccidentMsg);
+    //cancelAndDelete(startFakeAccidentMsg); DO WE NEED THIS
+	//cancelAndDelete(stopFakeAccidentMsg); DO WE NEED THIS
 
 	isPreInitialized = false;
 }
@@ -168,6 +170,7 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	else if(msg == startFakeAccidentMsg) {
 		//Need some good way to trigger the messages being sent
 		this->savedRoadId = this->road_id;
+		fakeState = 1;
 		simtime_t fakeAccidentDuration = par("fakeAccidentDuration");
 		scheduleAt(simTime() + fakeAccidentDuration, stopFakeAccidentMsg);
 		accidentCount--;

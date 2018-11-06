@@ -26,6 +26,7 @@ void Waymart::initialize(int stage) {
     BaseWaveApplLayer::initialize(stage);
     if (stage == 0) {
         sentMessage = false;
+        sentFakeMessage = false;
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
     }
@@ -103,10 +104,11 @@ void Waymart::handlePositionUpdate(cObject* obj) {
     else {
         lastDroveAt = simTime();
         // no crash - check for trigger for fake crash
-        if (mobility->getFakeState() == 1){
+        if (mobility->getFakeState() == 1 && !sentFakeMessage){
 
-            findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
-            sentMessage = true;
+            //findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
+            //sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
+            sentFakeMessage = true;
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
