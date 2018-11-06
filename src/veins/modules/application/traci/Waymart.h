@@ -43,6 +43,7 @@ class Waymart : public BaseWaveApplLayer {
 	protected:
 		simtime_t lastDroveAt;
 		bool sentMessage;
+		bool sentFakeMessage;
 		int currentSubscribedServiceId;
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);

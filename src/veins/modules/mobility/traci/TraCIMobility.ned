@@ -49,5 +49,6 @@ simple TraCIMobility extends BaseMobility
         volatile double fakeAccidentDuration @unit("s") = default(uniform(30s,60s)); // time of fake accident
         int fakeAccidentCount = default(0);
         double fakeAccidentStart @unit("s") = default(uniform(30s,60s));  // time until first fake accident, relative to departure time
+		volatile double fakeAccidentInterval @unit("s") = default(uniform(30s,60s));  // time between accidents       
 }
 
