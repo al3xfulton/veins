@@ -79,6 +79,11 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
 
+    if(simtime()%10 == 0){
+        UpdateMessage* um = new UpdateMessage();
+        populateWSM(um);
+
+    }
     // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {
         if (simTime() - lastDroveAt >= 10 && sentMessage == false) {
@@ -94,10 +99,12 @@ void Waymart::handlePositionUpdate(cObject* obj) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later
                 scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+                scheduleAt(computeAsynchronousSendingTime(1, type_SCH), um);
             }
             else {
                 //send right away on CCH, because channel switching is disabled
                 sendDown(wsm);
+                sendDown(um);
             }
         }
     }
