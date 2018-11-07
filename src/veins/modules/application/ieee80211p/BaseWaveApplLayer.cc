@@ -176,7 +176,7 @@ void BaseWaveApplLayer::populateWSM(WaveShortMessage* wsm, int rcvId, int serial
         wsa->setServiceDescription(currentServiceDescription.c_str());
     }
     else if (UpdateMessage* um = dynamic_cast<UpdateMessage*>(wsm) ){
-        um->setRoad_id(roadId);
+        um->setRoad_id(roadId.c_str());
     }
     else {
         if (dataOnSch) wsm->setChannelNumber(Channels::SCH1); //will be rewritten at Mac1609_4 to actual Service Channel. This is just so no controlInfo is needed

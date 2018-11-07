@@ -27,5 +27,5 @@ class WaveShortMessage;
 class noncobject Coord;
 
 packet UpdateMessage extends WaveShortMessage {
-	std::string road_id;
+	string road_id;
 }

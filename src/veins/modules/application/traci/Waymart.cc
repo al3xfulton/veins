@@ -56,7 +56,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     }
 }
 
-void Waymart::onUm(UpdateMessage* um) {
+void Waymart::onUM(UpdateMessage* um) {
     printf("UPDATE!");
 }
 
@@ -82,8 +82,9 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
-
-    if(simtime()%10 == 0){
+    simtime_t_cref ten = 10;
+    double temp = simTime().dbl();
+    if(int(temp) % 100 == 0){
         UpdateMessage* um = new UpdateMessage();
         populateWSM(um);
         if (dataOnSch){
