@@ -48,6 +48,7 @@ class Waymart : public BaseWaveApplLayer {
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
         virtual void onWSA(WaveServiceAdvertisment* wsa);
+		virtual void onUM(UpdateMessage* um);
 
         virtual void handleSelfMsg(cMessage* msg);
 		virtual void handlePositionUpdate(cObject* obj);

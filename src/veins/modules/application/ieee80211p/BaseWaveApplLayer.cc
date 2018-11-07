@@ -230,6 +230,9 @@ void BaseWaveApplLayer::handleLowerMsg(cMessage* msg) {
         receivedWSAs++;
         onWSA(wsa);
     }
+    else if (UpdateMessage* um = dynamic_cast<UpdateMessage*>(wsm)) {
+        onUM(um);
+    }
     else {
         receivedWSMs++;
         onWSM(wsm);
