@@ -56,10 +56,6 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     }
 }
 
-void Waymart::onUm(UpdateMessage* um) {
-    printf("UPDATE!");
-}
-
 void Waymart::handleSelfMsg(cMessage* msg) {
     if (WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg)) {
         //send this message on the service channel until the counter is 3 or higher.
@@ -86,11 +82,7 @@ void Waymart::handlePositionUpdate(cObject* obj) {
     if(simtime()%10 == 0){
         UpdateMessage* um = new UpdateMessage();
         populateWSM(um);
-        if (dataOnSch){
-            scheduleAt(computeAsynchronousSendingTime(1, type_SCH), um);
-        }else {
-            sendDown(um);
-        }
+
     }
     // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {
@@ -107,10 +99,12 @@ void Waymart::handlePositionUpdate(cObject* obj) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later
                 scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+                scheduleAt(computeAsynchronousSendingTime(1, type_SCH), um);
             }
             else {
                 //send right away on CCH, because channel switching is disabled
                 sendDown(wsm);
+                sendDown(um);
             }
         }
     }

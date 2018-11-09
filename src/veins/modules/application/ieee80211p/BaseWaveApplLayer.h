@@ -31,7 +31,6 @@
 #include "veins/modules/mac/ieee80211p/WaveAppToMac1609_4Interface.h"
 #include "veins/modules/mobility/traci/TraCIMobility.h"
 #include "veins/modules/mobility/traci/TraCICommandInterface.h"
-#include "veins/modules/messages/UpdateMessage_m.h"
 
 using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;
