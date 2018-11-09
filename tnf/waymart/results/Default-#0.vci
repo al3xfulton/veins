@@ -1,0 +1,106 @@
+file 87873 1541462904                                           
+version 2
+run Default-0-20181106-00:07:52-3550
+attr configname Default
+attr datetime 20181106-00:07:52
+attr experiment Default
+attr inifile omnetppW.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network way1
+attr processid 3550
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param **.debug false
+param **.coreDebug false
+param *.playgroundSizeX 2500m
+param *.playgroundSizeY 2500m
+param *.playgroundSizeZ 50m
+param *.annotations.draw true
+param *.manager.updateInterval 1s
+param *.manager.host "\"localhost\""
+param *.manager.port 9999
+param *.manager.autoShutdown true
+param *.manager.launchConfig "xmldoc(\"way1.launchd.xml\")"
+param *.connectionManager.sendDirect true
+param *.connectionManager.maxInterfDist 2600m
+param *.connectionManager.drawMaxIntfDist false
+param *.**.nic.mac1609_4.useServiceChannel false
+param *.**.nic.mac1609_4.txPower 20mW
+param *.**.nic.mac1609_4.bitrate 6Mbps
+param *.**.nic.phy80211p.sensitivity -89dBm
+param *.**.nic.phy80211p.useThermalNoise true
+param *.**.nic.phy80211p.thermalNoise -110dBm
+param *.**.nic.phy80211p.decider "xmldoc(\"config.xml\")"
+param *.**.nic.phy80211p.analogueModels "xmldoc(\"config.xml\")"
+param *.**.nic.phy80211p.usePropagationDelay true
+param *.node[*].applType "\"Waymart\""
+param *.node[*].appl.headerLength "80 bit"
+param *.node[*].appl.sendBeacons false
+param *.node[*].appl.dataOnSch false
+param *.node[*].appl.beaconInterval 1s
+param *.obstacles.debug false
+param *.obstacles.obstacles "xmldoc(\"config.xml\", \"//AnalogueModel[@type='SimpleObstacleShadowing']/obstacles\")"
+param *.node[*].veinsmobilityType.debug true
+param *.node[*].veinsmobility.x 0
+param *.node[*].veinsmobility.y 0
+param *.node[*].veinsmobility.z 1.895
+param *.node[*1].veinsmobility.fakeAccidentCount 1
+param *.node[*1].veinsmobility.fakeAccidentStart 70s
+param *.node[*1].veinsmobility.fakeAccidentDuration 40s
+
+vector 0 way1.node[0].veinsmobility posx ETV
+vector 1 way1.node[0].veinsmobility posy ETV
+vector 2 way1.node[0].veinsmobility speed ETV
+vector 3 way1.node[0].veinsmobility acceleration ETV
+vector 4 way1.node[0].veinsmobility co2emission ETV
+vector 5 way1.node[1].veinsmobility posx ETV
+vector 6 way1.node[1].veinsmobility posy ETV
+vector 7 way1.node[1].veinsmobility speed ETV
+vector 8 way1.node[1].veinsmobility acceleration ETV
+vector 9 way1.node[1].veinsmobility co2emission ETV
+vector 10 way1.node[2].veinsmobility posx ETV
+vector 11 way1.node[2].veinsmobility posy ETV
+vector 12 way1.node[2].veinsmobility speed ETV
+vector 13 way1.node[2].veinsmobility acceleration ETV
+vector 14 way1.node[2].veinsmobility co2emission ETV
+vector 15 way1.node[3].veinsmobility posx ETV
+vector 16 way1.node[3].veinsmobility posy ETV
+vector 17 way1.node[3].veinsmobility speed ETV
+vector 18 way1.node[3].veinsmobility acceleration ETV
+vector 19 way1.node[3].veinsmobility co2emission ETV
+vector 20 way1.node[4].veinsmobility posx ETV
+vector 21 way1.node[4].veinsmobility posy ETV
+vector 22 way1.node[4].veinsmobility speed ETV
+vector 23 way1.node[4].veinsmobility acceleration ETV
+vector 24 way1.node[4].veinsmobility co2emission ETV
+4	3151 2346 4 250 3 107 105 0.10333618640025 23.119688103427 487.02054095378 4001.9580746385
+3	5497 2670 4 250 3 107 105 -1.1128665183205 2.5166082486743 28.815227842883 71.289023461409
+2	8167 2550 3 250 2 107 106 1.8865424470045 30.98695261692 2119.5160699806 51667.515472259
+1	10717 2577 2 250 1 107 107 30.334893259109 2104.3845634779 86152.241312438 110360680.88385
+0	13294 2568 2 250 1 107 107 790.45925091659 908.58492327185 92138.06684675 79504284.169223
+9	15862 2502 14 266 13 122 110 -0.35046649833565 14.923480557521 471.7922443029 3576.7938201074
+8	18364 2840 14 266 13 122 110 -1.2474787755869 2.5262731315568 26.845319074321 82.775563348333
+7	21204 2716 13 266 12 122 111 2.1003037793096 29.108781094801 2122.3606981561 49027.168541789
+6	23920 2740 12 266 11 122 112 30.334893259109 2108.9646299211 91345.73420878 117687079.48146
+5	26660 2743 12 266 11 122 112 790.41477206839 908.56354874699 96416.183784953 83176007.695785
+14	29403 3359 34 318 33 174 142 0.44751517558217 20.956438616998 616.90048018933 5095.5141275117
+13	32762 3824 34 318 33 174 142 -4.5 2.4283114573918 25.811352335957 321.32164081036
+12	36586 3727 33 318 32 174 143 2.413640728849 28.552888406293 2272.5228136562 44470.940700835
+11	40313 3752 32 318 31 174 144 30.334893259109 2102.1481963071 123899.59781445 151164403.69802
+10	44065 3756 32 318 31 174 144 724.55143302355 908.54923820194 120458.42675191 101236305.40043
+19	47821 3424 44 329 43 185 143 -0.096904266143479 21.940645949763 591.95621292289 4926.6046283942
+18	51245 3890 44 329 43 185 143 -4.5 2.5879879088374 25.770371964322 298.80366931199
+17	55135 3773 43 329 42 185 144 1.4269468483282 28.199841992352 2272.4399541671 44114.859419556
+16	58908 3794 42 329 41 185 145 30.334893259109 2103.0887582377 122793.55985392 149742571.66561
+15	62702 3799 42 329 41 185 145 724.42161748099 908.61508298384 121517.19987836 102313721.3269
+24	66501 3880 109 386 83 242 160 0.067899991490747 17.930766335704 539.43226689477 3466.2108076989
+23	70381 4501 109 386 83 242 160 -4.2193773469073 2.5305446692742 22.163636916178 237.56885514183
+22	74882 4308 108 386 82 242 161 1.357091268315 24.461045588461 2283.2787408639 39334.977323593
+21	79190 4337 83 386 81 242 162 30.334893259109 2117.5387984499 138239.72877305 170682792.95111
+20	83527 4345 83 386 81 242 162 724.98178660844 908.58423645308 136071.67460988 114807572.00108
+
