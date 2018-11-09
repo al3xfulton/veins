@@ -176,7 +176,6 @@ class BaseWaveApplLayer : public BaseApplLayer {
         Coord curSpeed;
         int myId;
         int mySCH;
-        std::string roadId;
 
         /* stats */
         uint32_t generatedWSMs;
