@@ -49,7 +49,10 @@ subprojects/veins_inet/examples/**/.qtenvrc
 subprojects/veins_inet/examples/**/.cmdenv-log
 subprojects/veins_inet/examples/**/valgrind.out
 .vscode/c_cpp_properties.json
+<<<<<<< HEAD
 
 tnf/waymart/results/*
 
 *.DS_Store
+=======
+>>>>>>> parent of 9385d956... Alex's mac spits out annoying files
