@@ -89,9 +89,6 @@ class BaseWaveApplLayer : public BaseApplLayer {
         /** @brief this function is called upon receiving a WaveShortMessage */
         virtual void onWSM(WaveShortMessage* wsm) { };
 
-        /** @brief this function is called upon receiving an UpdateMessage */
-        virtual void onUM(UpdateMessage* um) { };
-
         /** @brief this function is called upon receiving a BasicSafetyMessage, also referred to as a beacon  */
         virtual void onBSM(BasicSafetyMessage* bsm) { };
 

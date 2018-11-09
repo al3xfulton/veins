@@ -187,9 +187,6 @@ class MIXIM_API BaseMobility : public BatteryAccess
     virtual Coord getCurrentDirection() const {
         return move.getDirection();
     }
-    virtual std::string getRoadId() const{
-        return "999";
-    }
   protected:
     /**
      * @brief Maps the passed icon size tag (is) to an actual size in pixels.
