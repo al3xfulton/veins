@@ -59,8 +59,6 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         }
 
     }
-        
-    }
     if (!sentMessage) {
         sentMessage = true;
         //repeat the received traffic update once in 2 seconds plus some random delay
