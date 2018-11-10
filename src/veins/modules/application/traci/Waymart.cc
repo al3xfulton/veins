@@ -46,7 +46,21 @@ void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
 void Waymart::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
-    if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
+    if (mobility->getRoadId()[0] != ':'){
+        bool found = false;
+        for (int i=0; i<reports.size(); i++){    
+            if(strcmp(reports[i], wsm->getWsmData()) == 0){
+                    traciVehicle->changeRoute(wsm->getWsmData(), 9999);
+                    found = true;
+            }
+        }
+        if (found == false){
+            reports.push_back(wsm->getWsmData());
+        }
+
+    }
+        
+    }
     if (!sentMessage) {
         sentMessage = true;
         //repeat the received traffic update once in 2 seconds plus some random delay

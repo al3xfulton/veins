@@ -45,6 +45,7 @@ class Waymart : public BaseWaveApplLayer {
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
+		vector <string> reports;
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
         virtual void onWSA(WaveServiceAdvertisment* wsa);
