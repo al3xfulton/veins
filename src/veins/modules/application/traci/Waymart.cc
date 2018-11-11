@@ -62,6 +62,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
         std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-1);
         std::string content_road = data_content.substr(data_content.find(delimiter2) + 2, data_content.length()-1);
+
         // Here is where we would check for matching sender_id and content_road in data structure
         // Do we want to get rid of an entry once we match it? Once we pass it? Keep timestamp?
 
@@ -92,6 +93,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     }
     else { // can check here for benign Info updates
         printf("%u %s %s\n", thisPSC.find(delimiter2), psc_cat.c_str(), psc_type.c_str());
+    }
 }
 
 void Waymart::handleSelfMsg(cMessage* msg) {
