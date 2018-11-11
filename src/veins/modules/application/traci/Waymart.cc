@@ -29,6 +29,11 @@ void Waymart::initialize(int stage) {
         sentFakeMessage = false;
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
+        alertAccident = "Alert::Accident";
+        dataField1 = "origSender::";
+        dataField2 = "**mData::";
+        delimiter1 = "**";
+        delimiter2 = "::";
     }
 }
 
@@ -46,13 +51,34 @@ void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
 void Waymart::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
-    if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
-    if (!sentMessage) {
-        sentMessage = true;
-        //repeat the received traffic update once in 2 seconds plus some random delay
-        wsm->setSenderAddress(myId);
-        wsm->setSerial(3);
-        scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+    std::string thisPSC = wsm->getPsc();
+    std::string psc_cat = thisPSC.substr(0, thisPSC.find(delimiter2));
+    std::string psc_type = thisPSC.substr(thisPSC.find(delimiter2) + 2, thisPSC.length() - 1);
+
+    if(psc_cat == "Alert" && psc_type == "Accident") {
+        std::string thisData = wsm->getWsmData();
+        std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
+        std::string data_content = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - 1);
+
+        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-1);
+        std::string content_road = data_content.substr(data_content.find(delimiter2) + 2, data_content.length()-1);
+        // Here is where we would check for matching sender_id and content_road in data structure
+        // Do we want to get rid of an entry once we match it? Once we pass it? Keep timestamp?
+
+        //printf("%s %s %s %s \n", data_sender.c_str(), sender_id.c_str(), data_content.c_str(), content_road.c_str());
+
+        if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(content_road, 9999);
+        if (!sentMessage) {
+            sentMessage = true;
+            //repeat the received traffic update once in 2 seconds plus some random delay
+            wsm->setSenderAddress(myId);
+            wsm->setSerial(3);
+            scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+        }
+
+    }
+    else { // can check here for benign Info updates
+        printf("%u %s %s\n", thisPSC.find(delimiter2), psc_cat.c_str(), psc_type.c_str());
     }
 }
 
@@ -87,7 +113,9 @@ void Waymart::handlePositionUpdate(cObject* obj) {
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
-            wsm->setWsmData(mobility->getRoadId().c_str());
+            wsm->setPsc(alertAccident.c_str());
+            std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str());
+            wsm->setWsmData(filler.c_str());
 
             //host is standing still due to crash
             if (dataOnSch) {
@@ -106,13 +134,15 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         // no crash - check for trigger for fake crash
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
 
-            //findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
-            //sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
+            findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
+            sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
             sentFakeMessage = true;
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
-            wsm->setWsmData(mobility->getSavedRoadId().c_str());
+            wsm->setPsc(alertAccident.c_str());
+            std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getSavedRoadId().c_str());
+            wsm->setWsmData(filler.c_str());
 
             // I have no idea what this means
             if (dataOnSch) {

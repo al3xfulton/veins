@@ -146,8 +146,8 @@ void TraCIMobility::finish()
 
 	cancelAndDelete(startAccidentMsg);
 	cancelAndDelete(stopAccidentMsg);
-    //cancelAndDelete(startFakeAccidentMsg); DO WE NEED THIS
-	//cancelAndDelete(stopFakeAccidentMsg); DO WE NEED THIS
+    cancelAndDelete(startFakeAccidentMsg);
+	cancelAndDelete(stopFakeAccidentMsg);
 
 	isPreInitialized = false;
 }

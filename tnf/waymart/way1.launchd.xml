@@ -3,7 +3,7 @@
 <launch>
 	<copy file="osm.net.xml" />
 	<copy file="osm.passenger.rou.xml" />
-	<copy file="osm.passenger.trips3.xml" />
+	<copy file="osm.passenger.trips2.xml" />
 	<copy file="osm.poly.xml" />
 	<copy file="osm.sumocfg" type="config" />
 </launch>
