@@ -67,7 +67,20 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
         //printf("%s %s %s %s \n", data_sender.c_str(), sender_id.c_str(), data_content.c_str(), content_road.c_str());
 
-        if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(content_road, 9999);
+        // CURRENTLY ONLY CHECKING FOR ROAD ID IN THE STRUCTURE, NOT SENDER
+        if (mobility->getRoadId()[0] != ':'){
+            bool found = false;
+            for (int i=0; i<reports.size(); i++){
+                if(strcmp(reports[i], content_road) == 0){
+                        traciVehicle->changeRoute(content_road, 9999);
+                        found = true;
+                }
+            }
+            if (found == false){
+                reports.push_back(content_road);
+            }
+
+        }
         if (!sentMessage) {
             sentMessage = true;
             //repeat the received traffic update once in 2 seconds plus some random delay
@@ -79,7 +92,6 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     }
     else { // can check here for benign Info updates
         printf("%u %s %s\n", thisPSC.find(delimiter2), psc_cat.c_str(), psc_type.c_str());
-    }
 }
 
 void Waymart::handleSelfMsg(cMessage* msg) {

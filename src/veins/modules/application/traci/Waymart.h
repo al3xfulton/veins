@@ -45,11 +45,15 @@ class Waymart : public BaseWaveApplLayer {
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
+
 		std::string alertAccident;
 		std::string dataField1;
 		std::string dataField2;
 		std::string delimiter1;
 		std::string delimiter2;
+
+		vector <string> reports;
+
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
         virtual void onWSA(WaveServiceAdvertisment* wsa);

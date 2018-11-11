@@ -49,3 +49,7 @@ subprojects/veins_inet/examples/**/.qtenvrc
 subprojects/veins_inet/examples/**/.cmdenv-log
 subprojects/veins_inet/examples/**/valgrind.out
 .vscode/c_cpp_properties.json
+
+*.DS_Store
+
+tnf/waymart/results/*
