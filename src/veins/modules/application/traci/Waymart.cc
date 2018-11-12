@@ -30,10 +30,12 @@ void Waymart::initialize(int stage) {
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
         alertAccident = "Alert::Accident";
+        infoWeather = "Info::Weather";
         dataField1 = "origSender::";
         dataField2 = "**mData::";
         delimiter1 = "**";
         delimiter2 = "::";
+        timeFromMessage = 0;
     }
 }
 
@@ -72,7 +74,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         if (mobility->getRoadId()[0] != ':'){
             bool found = false;
             for (int i=0; i<reports.size(); i++){
-                if(strcmp(reports[i], content_road) == 0){
+                if (strcmp(reports[i], content_road) == 0){
                         traciVehicle->changeRoute(content_road, 9999);
                         found = true;
                 }
@@ -91,8 +93,20 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         }
 
     }
-    else { // can check here for benign Info updates
-        printf("%u %s %s\n", thisPSC.find(delimiter2), psc_cat.c_str(), psc_type.c_str());
+    else if (psc_cat == "Info" && psc_type == "Weather") { // can check here for benign Info updates
+        printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
+
+        std::string thisData = wsm->getWsmData();
+        std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
+        std::string data_content = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - 1);
+
+        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-1);
+        std::string content_weather = data_content.substr(data_content.find(delimiter2) + 2, data_content.length()-1);
+
+        printf("%s %s \n", sender_id.c_str(), content_weather.c_str());
+    }
+    else {
+        printf("Unrecognized message \n");
     }
 }
 
@@ -118,6 +132,30 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
+
+    if (timeFromMessage >= 60) {
+        timeFromMessage = 0;
+
+        WaveShortMessage* wsm = new WaveShortMessage();
+        populateWSM(wsm);
+        wsm->setPsc(infoWeather.c_str());
+        std::string filler = dataField1 + std::to_string(myId) + dataField2 + ("rain");
+        wsm->setWsmData(filler.c_str());
+
+        //host is standing still due to crash
+        if (dataOnSch) {
+            startService(Channels::SCH2, 42, "Traffic Information Service");
+            //started service and server advertising, schedule message to self to send later
+            scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+        }
+        else {
+            //send right away on CCH, because channel switching is disabled
+            sendDown(wsm);
+        }
+    }
+    else {
+        timeFromMessage ++;
+    }
 
     // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {

@@ -46,12 +46,14 @@ class Waymart : public BaseWaveApplLayer {
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
 
+		std::string infoWeather;
 		std::string alertAccident;
 		std::string dataField1;
 		std::string dataField2;
 		std::string delimiter1;
 		std::string delimiter2;
 
+		int timeFromMessage;
 		vector <string> reports;
 
 	protected:
