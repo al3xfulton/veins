@@ -75,9 +75,13 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             iter = reports.find(content_road);
 
             if (iter != reports.end()){ // Road ID already in map
+                printf("Vehicle %d receives report from %s of Accident on: %s\n", myId, sender_id.c_str(), content_road.c_str());
                 if (iter->second != sender_id) { // Different sender -> not an echo
                     printf("Vehicle %d verified Accident on: %s\n", myId, content_road.c_str());
                     traciVehicle->changeRoute(content_road, 9999);
+                }
+                else {
+                    printf("Vehicle %d is comparing %s and %s \n", myId, (iter->second).c_str(), sender_id.c_str());
                 }
             }
             else { // put new thing in map
@@ -134,7 +138,7 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
 
-    if (timeFromMessage >= 60) {
+    if (timeFromMessage >= 600) {
         timeFromMessage = 0;
 
         WaveShortMessage* wsm = new WaveShortMessage();
