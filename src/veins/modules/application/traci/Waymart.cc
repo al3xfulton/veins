@@ -74,7 +74,8 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         if (mobility->getRoadId()[0] != ':'){
             bool found = false;
             for (int i=0; i<reports.size(); i++){
-                if (strcmp(reports[i], content_road) == 0){
+                if (strcmp(reports[i].c_str(), content_road.c_str()) == 0){
+                        printf("Vehicle %d verified Accident on: %s\n", myId, content_road.c_str());
                         traciVehicle->changeRoute(content_road, 9999);
                         found = true;
                 }

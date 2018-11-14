@@ -22,6 +22,7 @@
 #define Waymart_H
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
+#include <string.h>
 
 /**
  * @brief
@@ -54,7 +55,7 @@ class Waymart : public BaseWaveApplLayer {
 		std::string delimiter2;
 
 		int timeFromMessage;
-		vector <string> reports;
+		std::vector <std::string> reports;
 
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
