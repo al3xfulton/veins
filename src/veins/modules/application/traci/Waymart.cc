@@ -72,16 +72,16 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
         // CURRENTLY ONLY CHECKING FOR ROAD ID IN THE STRUCTURE, NOT SENDER
         if (mobility->getRoadId()[0] != ':'){
-            bool found = false;
-            for (int i=0; i<reports.size(); i++){
-                if (strcmp(reports[i].c_str(), content_road.c_str()) == 0){
-                        printf("Vehicle %d verified Accident on: %s\n", myId, content_road.c_str());
-                        traciVehicle->changeRoute(content_road, 9999);
-                        found = true;
+            iter = reports.find(content_road);
+
+            if (iter != reports.end()){ // Road ID already in map
+                if (iter->second != sender_id) { // Different sender -> not an echo
+                    printf("Vehicle %d verified Accident on: %s\n", myId, content_road.c_str());
+                    traciVehicle->changeRoute(content_road, 9999);
                 }
             }
-            if (found == false){
-                reports.push_back(content_road);
+            else { // put new thing in map
+                reports[content_road] = sender_id;
             }
 
         }

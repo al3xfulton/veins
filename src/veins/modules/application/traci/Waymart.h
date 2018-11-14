@@ -55,7 +55,8 @@ class Waymart : public BaseWaveApplLayer {
 		std::string delimiter2;
 
 		int timeFromMessage;
-		std::vector <std::string> reports;
+		std::map<std::string, std::string> reports;
+		std::map<std::string, std::string>::iterator iter;
 
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
