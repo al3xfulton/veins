@@ -33,6 +33,7 @@ void Waymart::initialize(int stage) {
         infoWeather = "Info::Weather";
         dataField1 = "origSender::";
         dataField2 = "**mData::";
+        dataField3 = "**mData2::";
         delimiter1 = "**";
         delimiter2 = "::";
         timeFromMessage = 0;
@@ -55,46 +56,63 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
     std::string thisPSC = wsm->getPsc();
     std::string psc_cat = thisPSC.substr(0, thisPSC.find(delimiter2));
-    std::string psc_type = thisPSC.substr(thisPSC.find(delimiter2) + 2, thisPSC.length() - 1);
+    std::string psc_type = thisPSC.substr(thisPSC.find(delimiter2) + 2, thisPSC.length() - psc_cat.length() - 2);
 
     if(psc_cat == "Alert" && psc_type == "Accident") {
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
-        std::string data_content = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - 1);
+        std::string temp = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - data_sender.length() - 2);
 
-        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-1);
-        std::string content_road = data_content.substr(data_content.find(delimiter2) + 2, data_content.length()-1);
+        std::string data_road = temp.substr(0, temp.find(delimiter1));
+        std::string data_time = temp.substr(temp.find(delimiter1) + 2, temp.length() - data_road.length() - 2);
 
-        // Here is where we would check for matching sender_id and content_road in data structure
-        // Do we want to get rid of an entry once we match it? Once we pass it? Keep timestamp?
+        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-dataField1.length());
+        std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
+        std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
-        //printf("%s %s %s %s \n", data_sender.c_str(), sender_id.c_str(), data_content.c_str(), content_road.c_str());
+        printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
-        // CURRENTLY ONLY CHECKING FOR ROAD ID IN THE STRUCTURE, NOT SENDER
         if (mobility->getRoadId()[0] != ':'){
-            iter = reports.find(content_road);
+            iter = reports.find(road_id);
 
             if (iter != reports.end()){ // Road ID already in map
-                printf("Vehicle %d receives report from %s of Accident on: %s\n", myId, sender_id.c_str(), content_road.c_str());
-                if (iter->second != sender_id) { // Different sender -> not an echo
-                    printf("Vehicle %d verified Accident on: %s\n", myId, content_road.c_str());
-                    traciVehicle->changeRoute(content_road, 9999);
+                printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
+
+                if (std::stoi(time_sent) - std::stoi(iter->second.second) > 300) {
+                    printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
+                    iter->second = std::make_pair(sender_id, time_sent);
+                    // Echo
+                    //repeat the received traffic update once in 2 seconds plus some random delay
+                    wsm->setSenderAddress(myId);
+                    wsm->setSerial(3);
+                    scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                    // Don't reroute
                 }
-                else {
-                    printf("Vehicle %d is comparing %s and %s \n", myId, (iter->second).c_str(), sender_id.c_str());
+                else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
+                    printf("Vehicle %d verified Accident on: %s\n", myId, road_id.c_str());
+
+                    iter->second = std::make_pair(sender_id, time_sent);
+                    traciVehicle->changeRoute(road_id, 9999);
+                    // Send echo
+                    //repeat the received traffic update once in 2 seconds plus some random delay
+                    wsm->setSenderAddress(myId);
+                    wsm->setSerial(3);
+                    scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                }
+                else { // An echo of a recent message or a repeat from the original sender
+                    printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
+                    // Don't echo, react, or update map
                 }
             }
             else { // put new thing in map
-                reports[content_road] = sender_id;
+                reports[road_id] = std::make_pair(sender_id, time_sent);
+                // Send echo
+                //repeat the received traffic update once in 2 seconds plus some random delay
+                wsm->setSenderAddress(myId);
+                wsm->setSerial(3);
+                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
             }
 
-        }
-        if (!sentMessage) {
-            sentMessage = true;
-            //repeat the received traffic update once in 2 seconds plus some random delay
-            wsm->setSenderAddress(myId);
-            wsm->setSerial(3);
-            scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
         }
 
     }
@@ -103,15 +121,19 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
-        std::string data_content = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - 1);
+        std::string temp = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - data_sender.length() - 2);
 
-        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-1);
-        std::string content_weather = data_content.substr(data_content.find(delimiter2) + 2, data_content.length()-1);
+        std::string data_road = temp.substr(0, temp.find(delimiter1));
+        std::string data_state = temp.substr(temp.find(delimiter1) + 2, temp.length() - data_road.length() - 2);
 
-        printf("%s %s \n", sender_id.c_str(), content_weather.c_str());
+        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-dataField1.length());
+        std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
+        std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
+
+        printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
     }
     else {
-        printf("Unrecognized message \n");
+        printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
     }
 }
 
@@ -144,7 +166,7 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         WaveShortMessage* wsm = new WaveShortMessage();
         populateWSM(wsm);
         wsm->setPsc(infoWeather.c_str());
-        std::string filler = dataField1 + std::to_string(myId) + dataField2 + ("rain");
+        std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + ("rain");
         wsm->setWsmData(filler.c_str());
 
         //host is standing still due to crash
@@ -164,32 +186,47 @@ void Waymart::handlePositionUpdate(cObject* obj) {
 
     // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {
-        if (simTime() - lastDroveAt >= 10 && sentMessage == false) {
-            findHost()->getDisplayString().updateWith("r=16,red");
-            sentMessage = true;
+        if (myId == 13 || myId == 7) {
+            printf("%d is at a stand still \n", myId);
+        }
 
-            WaveShortMessage* wsm = new WaveShortMessage();
-            populateWSM(wsm);
-            wsm->setPsc(alertAccident.c_str());
-            std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str());
-            wsm->setWsmData(filler.c_str());
-
-            //host is standing still due to crash
-            if (dataOnSch) {
-                startService(Channels::SCH2, 42, "Traffic Information Service");
-                //started service and server advertising, schedule message to self to send later
-                scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+        if (simTime() - lastDroveAt >= 10) {
+            if (myId == 13 || myId == 7) {
+                printf("%d hasn't moved in a while; SM is %d \n", myId, sentMessage);
             }
-            else {
-                //send right away on CCH, because channel switching is disabled
-                sendDown(wsm);
+
+            if (sentMessage == false) {
+                printf("%d prepping accident message \n", myId);
+                findHost()->getDisplayString().updateWith("r=16,red");
+                sentMessage = true;
+
+                WaveShortMessage* wsm = new WaveShortMessage();
+                populateWSM(wsm);
+                wsm->setPsc(alertAccident.c_str());
+                std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + (simTime().str());
+                wsm->setWsmData(filler.c_str());
+
+                //host is standing still due to crash
+                if (dataOnSch) {
+                    startService(Channels::SCH2, 42, "Traffic Information Service");
+                    //started service and server advertising, schedule message to self to send later
+                    scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+                }
+                else {
+                    //send right away on CCH, because channel switching is disabled
+                    sendDown(wsm);
+                }
             }
         }
+
+
     }
     else {
         lastDroveAt = simTime();
         // no crash - check for trigger for fake crash
+        //printf("%d about to send accident message \n", myId);
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
+            printf("%d prepping accident message \n", myId);
 
             findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
             sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
@@ -198,7 +235,7 @@ void Waymart::handlePositionUpdate(cObject* obj) {
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
             wsm->setPsc(alertAccident.c_str());
-            std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getSavedRoadId().c_str());
+            std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getSavedRoadId().c_str() + dataField3 + (simTime().str()));
             wsm->setWsmData(filler.c_str());
 
             // I have no idea what this means

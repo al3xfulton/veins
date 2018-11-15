@@ -80,6 +80,7 @@ void TraCIDemo11p::handlePositionUpdate(cObject* obj) {
 
     // stopped for for at least 10s?
     if (mobility->getSpeed() < 1) {
+
         if (simTime() - lastDroveAt >= 10 && sentMessage == false) {
             findHost()->getDisplayString().updateWith("r=16,red");
             sentMessage = true;
