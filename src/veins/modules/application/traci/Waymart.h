@@ -38,6 +38,10 @@
  *
  */
 
+struct Trust {
+	float dataTrust;
+	int numMessages;
+}
 class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
@@ -54,6 +58,9 @@ class Waymart : public BaseWaveApplLayer {
 		std::string dataField3;
 		std::string delimiter1;
 		std::string delimiter2;
+
+		std::map<int, Trust> trustMap;
+		std::map<int, Trust> trustMap::iterator trustIter;
 
 		int timeFromMessage;
 		std::map<std::string, std::pair<std::string, std::string>> reports;

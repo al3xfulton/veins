@@ -52,6 +52,7 @@ void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
 }
 
 void Waymart::onWSM(WaveShortMessage* wsm) {
+    addVehicle(wsm->getSenderId());
     findHost()->getDisplayString().updateWith("r=16,green");
 
     std::string thisPSC = wsm->getPsc();
@@ -70,6 +71,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
+        addVehicle(sender_id);
         //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
@@ -130,6 +132,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
 
+        addVehicle(sender_id);
         //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
     }
     else {
@@ -243,5 +246,15 @@ void Waymart::handlePositionUpdate(cObject* obj) {
                 sendDown(wsm);
             }
         }
+    }
+}
+
+void Waymart::addVehicle(int nodeId){
+    trustIter = trustMap.find(nodeId);
+    if(trustIter == trustMap.end()){
+        Trust temp;
+        temp.dataTrust = (float)rand(100)/100;
+        temp.numMessages = 0;
+        trustMap[nodeId] = temp;
     }
 }
