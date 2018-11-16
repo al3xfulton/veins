@@ -74,7 +74,9 @@ class Waymart : public BaseWaveApplLayer {
         virtual void handleSelfMsg(cMessage* msg);
 		virtual void handlePositionUpdate(cObject* obj);
 
-		virtual void addVehicle(int nodeId);
+		virtual void updateMatrix(int nodeId);
+		virtual void addEntry(int nodeId);
+		virtual void modifyEntry(int nodeId);
 
 };
 
