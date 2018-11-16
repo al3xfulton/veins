@@ -41,7 +41,8 @@
 struct Trust {
 	float dataTrust;
 	int numMessages;
-}
+};
+
 class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
@@ -60,7 +61,7 @@ class Waymart : public BaseWaveApplLayer {
 		std::string delimiter2;
 
 		std::map<int, Trust> trustMap;
-		std::map<int, Trust> trustMap::iterator trustIter;
+		std::map<int, Trust>::iterator trustIter;
 
 		int timeFromMessage;
 		std::map<std::string, std::pair<std::string, std::string>> reports;
@@ -72,6 +73,9 @@ class Waymart : public BaseWaveApplLayer {
 
         virtual void handleSelfMsg(cMessage* msg);
 		virtual void handlePositionUpdate(cObject* obj);
+
+		virtual void addVehicle(int nodeId);
+
 };
 
 #endif
