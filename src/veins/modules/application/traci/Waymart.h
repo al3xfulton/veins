@@ -39,8 +39,13 @@
  */
 
 struct Trust {
-	float dataTrust;
+	float dataPlausibility;
+	float dataBelief;
+	float dataTrue;
+	float dataFalse;
 	int numMessages;
+	int numTrue;
+	int numFalse;
 };
 
 class Waymart : public BaseWaveApplLayer {

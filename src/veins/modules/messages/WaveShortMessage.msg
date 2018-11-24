@@ -18,6 +18,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
+cplusplus {{
+#include <string.h>
+#include <vector>
+}}
+
 packet WaveShortMessage {
 	//Version of the Wave Short Message
 	int wsmVersion = 0;
@@ -42,4 +47,5 @@ packet WaveShortMessage {
 	int recipientAddress = -1;
 	int serial = 0;
 	simtime_t timestamp = 0;
+	//vector trustMap; //Declare this as a null entity?
 }

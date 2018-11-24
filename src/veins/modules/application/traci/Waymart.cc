@@ -260,25 +260,35 @@ void Waymart::updateMatrix(int nodeId){
     }
 
     for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
-        std::cout << "Vehicle " << myId << ": Key: " << (it->first) << "; Value: " << (it->second.dataTrust) << "\n";
+        std::cout << "Vehicle " << myId << ": Key: " << (it->first) << "; Belief: " << (it->second.dataBelief) << "; Plausibility: " << (it->second.dataPlausibility) << "\n";
     }
 }
 
 void Waymart::addEntry(int nodeId){
     Trust temp;
-    temp.dataTrust = (float)((rand()%20)+80)/100;
+    //temp.dataTrust = (float)((rand()%20)+80)/100;
     temp.numMessages = 5;
+    temp.numTrue = 1;
+    temp.numFalse = 2;
+    temp.dataBelief = temp.numTrue/temp.numMessages;
+    temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
     trustMap[nodeId] = temp;
 }
 
+//Currently assumes that information being recieved is valid/true
 void Waymart::modifyEntry(int nodeId){
     Trust myStruct = trustMap[nodeId];
 
-    float tr = myStruct.dataTrust;
-    int ct = myStruct.numMessages;
+    float bel = myStruct.dataBelief; //Probably not necessary
+    float pls = myStruct.dataPlausibility; //Probably not necessary
+    int count = myStruct.numMessages;
+    int numTrue = myStruct.numTrue;
+    int numFalse = myStruct.numFalse;
+    bel = numTrue/count;
+    pls = 1 - numFalse/count;
 
-    float newTr = ((tr * ct) + 1)/(ct + 1);
-    myStruct.dataTrust = newTr;
+    myStruct.dataPlausibility = bel;
+    myStruct.dataBelief = pls;
     myStruct.numMessages++;
     trustMap[nodeId] = myStruct;
 }
