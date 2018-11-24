@@ -32,12 +32,16 @@ void Waymart::initialize(int stage) {
         currentSubscribedServiceId = -1;
         alertAccident = "Alert::Accident";
         infoWeather = "Info::Weather";
+        infoTrust = "Info::Trust";
         dataField1 = "origSender::";
         dataField2 = "**mData::";
         dataField3 = "**mData2::";
         delimiter1 = "**";
         delimiter2 = "::";
         timeFromMessage = 0;
+
+        updateTime = round(59 * (rand() / RAND_MAX));
+        timeFromUpdate = 0;
     }
 }
 
@@ -119,22 +123,30 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         }
 
     }
-    else if (psc_cat == "Info" && psc_type == "Weather") { // can check here for benign Info updates
-        //printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
+    else if (psc_cat == "Info") {
+        if (psc_type == "Weather") { // can check here for benign Info updates
 
-        std::string thisData = wsm->getWsmData();
-        std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
-        std::string temp = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - data_sender.length() - 2);
+            //printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
 
-        std::string data_road = temp.substr(0, temp.find(delimiter1));
-        std::string data_state = temp.substr(temp.find(delimiter1) + 2, temp.length() - data_road.length() - 2);
+            std::string thisData = wsm->getWsmData();
+            std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
+            std::string temp = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - data_sender.length() - 2);
 
-        std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-dataField1.length());
-        std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
-        std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
+            std::string data_road = temp.substr(0, temp.find(delimiter1));
+            std::string data_state = temp.substr(temp.find(delimiter1) + 2, temp.length() - data_road.length() - 2);
 
-        updateMatrix(std::stoi(sender_id));
-        //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
+            std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-dataField1.length());
+            std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
+            std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
+
+            updateMatrix(std::stoi(sender_id));
+            //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
+        }
+
+        else if (psc_type == "Trust") {
+            printf("This is a Trust Matrix message");
+            // Parse Trust matrix here
+        }
     }
     else {
         //printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
@@ -186,6 +198,45 @@ void Waymart::handlePositionUpdate(cObject* obj) {
     }
     else {
         timeFromMessage ++;
+    }
+
+    if (timeFromUpdate % 60 == updateTime) {
+
+        // Perform Processing
+        // Don't process entries that come in while we're processing, or we may be stuck forever
+        int left = toProcess.size();
+        while (left > 0 ) {
+            Backlog current = toProcess.front();
+            outsideIter = outOpinionMap.find(current.subjectId);
+
+            if (outsideIter == outOpinionMap.end()) {
+                // new entry
+                OutsideOpinion newOp;
+                newOp.outBelief = current.foreignBelief;
+                newOp.outPlaus = current.foreignPlaus;
+                newOp.contributors = 1;
+                outOpinionMap[current.subjectId] = newOp;
+            }
+            else {
+                // update existing entry
+                OutsideOpinion oldOp = outsideIter->second;
+                OutsideOpinion newOp;
+                newOp.outBelief = ((oldOp.outBelief * oldOp.contributors) + current.foreignBelief) / (oldOp.contributors + 1);
+                newOp.outPlaus = ((oldOp.outPlaus * oldOp.contributors) + current.foreignPlaus) / (oldOp.contributors + 1);
+                newOp.contributors = oldOp.contributors + 1;
+                outsideIter->second = newOp;
+            }
+
+            // pop it
+            toProcess.pop();
+
+            // decrease left
+            left --;
+        }
+
+    }
+    else {
+        timeFromUpdate ++;
     }
 
     // stopped for for at least 10s? Indicating a crash
@@ -287,8 +338,8 @@ void Waymart::modifyEntry(int nodeId){
     bel = numTrue/count;
     pls = 1 - numFalse/count;
 
-    myStruct.dataPlausibility = bel;
-    myStruct.dataBelief = pls;
+    myStruct.dataPlausibility = pls;
+    myStruct.dataBelief = bel;
     myStruct.numMessages++;
     trustMap[nodeId] = myStruct;
 }

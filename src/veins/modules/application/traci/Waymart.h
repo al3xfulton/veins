@@ -48,6 +48,23 @@ struct Trust {
 	int numFalse;
 };
 
+struct OutsideOpinion {
+    float outBelief;
+    float outPlaus;
+    int contributors;
+};
+
+struct Backlog {
+    int subjectId;
+    float foreignBelief;
+    float foreignPlaus;
+};
+
+struct OperatingVals {
+    float opBelief;
+    float opPlaus;
+};
+
 class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
@@ -58,6 +75,7 @@ class Waymart : public BaseWaveApplLayer {
 		int currentSubscribedServiceId;
 
 		std::string infoWeather;
+		std::string infoTrust;
 		std::string alertAccident;
 		std::string dataField1;
 		std::string dataField2;
@@ -65,9 +83,24 @@ class Waymart : public BaseWaveApplLayer {
 		std::string delimiter1;
 		std::string delimiter2;
 
+		// For internal opinions about each vehicle (and external?)
 		std::map<int, Trust> trustMap;
 		std::map<int, Trust>::iterator trustIter;
 
+        // For external opinions about each vehicle
+        std::map<int, OutsideOpinion> outOpinionMap;
+        std::map<int, OutsideOpinion>::iterator outsideIter;
+
+        // For storing outside opinions until they are processed
+        // Queue is used so that input can be processed in the order in which it was received
+        int updateTime;
+        int timeFromUpdate;
+        std::queue<Backlog> toProcess;
+
+        // For reflecting the operational Belief and Plausibility values for each vehicle
+        std::map<int, OperatingVals> operationalResults;
+
+		// For tracking Accident messages (used for Simple Verification)
 		int timeFromMessage;
 		std::map<std::string, std::pair<std::string, std::string>> reports;
 		std::map<std::string, std::pair<std::string, std::string>>::iterator iter;
