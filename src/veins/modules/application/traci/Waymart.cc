@@ -57,7 +57,6 @@ void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
 }
 
 void Waymart::onWSM(WaveShortMessage* wsm) {
-    updateMatrix(wsm->getSenderAddress());
     findHost()->getDisplayString().updateWith("r=16,green");
 
     std::string thisPSC = wsm->getPsc();
@@ -76,7 +75,9 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
-        updateMatrix(std::stoi(sender_id));
+        // Check if you can verify the new message
+        // If you can, verify whether it is true
+        updateMatrix(std::stoi(sender_id), true, true); // Assumes all incoming messages are True
         //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
@@ -139,7 +140,9 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
             std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
 
-            updateMatrix(std::stoi(sender_id));
+            // Check if you can verify the new message
+            // If you can, verify whether it is true
+            updateMatrix(std::stoi(sender_id), true, true); // Assumes all incoming messages are True
             //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
         }
 
@@ -301,13 +304,15 @@ void Waymart::handlePositionUpdate(cObject* obj) {
     }
 }
 
-void Waymart::updateMatrix(int nodeId){
+// Checkable denotes whether we personally could see if the data was True or False
+// If the data was checkable, Verified denotes whether it was successfully verified as True
+void Waymart::updateMatrix(int nodeId, bool checkable, bool verified){
     trustIter = trustMap.find(nodeId);
     if(trustIter == trustMap.end()){
-        addEntry(nodeId);
+        addEntry(nodeId, checkable, verified);
     }
     else {
-        modifyEntry(nodeId);
+        modifyEntry(nodeId, checkable, verified);
     }
 
     for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
@@ -315,31 +320,60 @@ void Waymart::updateMatrix(int nodeId){
     }
 }
 
-void Waymart::addEntry(int nodeId){
+void Waymart::addEntry(int nodeId, bool checkable, bool verified){
+
     Trust temp;
     //temp.dataTrust = (float)((rand()%20)+80)/100;
+
     temp.numMessages = 5;
     temp.numTrue = 1;
     temp.numFalse = 2;
+
+    // To be used if we implement a different mode of "hand waving" initialization
+    /*
+    temp.numMessages = 1;
+
+    if (checkable) {
+        if (verified) {
+            temp.numTrue = 1;
+            temp.numFalse = 0;
+        }
+        else {
+            temp.numTrue = 0;
+            temp.numFalse = 1;
+        }
+    }
+    else {
+        temp.numTrue = 0;
+        temp.numFalse = 0;
+    }
+    */
+
     temp.dataBelief = temp.numTrue/temp.numMessages;
     temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
     trustMap[nodeId] = temp;
 }
 
-//Currently assumes that information being recieved is valid/true
-void Waymart::modifyEntry(int nodeId){
+void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
     Trust myStruct = trustMap[nodeId];
 
-    float bel = myStruct.dataBelief; //Probably not necessary
-    float pls = myStruct.dataPlausibility; //Probably not necessary
-    int count = myStruct.numMessages;
+    int count = ++ myStruct.numMessages;
     int numTrue = myStruct.numTrue;
     int numFalse = myStruct.numFalse;
-    bel = numTrue/count;
-    pls = 1 - numFalse/count;
+
+    if (checkable) {
+        if (verified) {
+            int numTrue = ++ myStruct.numTrue;
+        }
+        else {
+            int numFalse = ++ myStruct.numFalse;
+        }
+    }
+
+    float bel = numTrue/count;
+    float pls = 1 - numFalse/count;
 
     myStruct.dataPlausibility = pls;
     myStruct.dataBelief = bel;
-    myStruct.numMessages++;
     trustMap[nodeId] = myStruct;
 }

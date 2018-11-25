@@ -41,8 +41,6 @@
 struct Trust {
 	float dataPlausibility;
 	float dataBelief;
-	float dataTrue;
-	float dataFalse;
 	int numMessages;
 	int numTrue;
 	int numFalse;
@@ -98,7 +96,8 @@ class Waymart : public BaseWaveApplLayer {
         std::queue<Backlog> toProcess;
 
         // For reflecting the operational Belief and Plausibility values for each vehicle
-        std::map<int, OperatingVals> operationalResults;
+        // Don't need this when calculating belief/plausibility at time of decision
+        //std::map<int, OperatingVals> operationalResults;
 
 		// For tracking Accident messages (used for Simple Verification)
 		int timeFromMessage;
@@ -112,9 +111,9 @@ class Waymart : public BaseWaveApplLayer {
         virtual void handleSelfMsg(cMessage* msg);
 		virtual void handlePositionUpdate(cObject* obj);
 
-		virtual void updateMatrix(int nodeId);
-		virtual void addEntry(int nodeId);
-		virtual void modifyEntry(int nodeId);
+		virtual void updateMatrix(int nodeId, bool checkable, bool verified);
+		virtual void addEntry(int nodeId, bool checkable, bool verified);
+		virtual void modifyEntry(int nodeId, bool checkable, bool verified);
 
 };
 
