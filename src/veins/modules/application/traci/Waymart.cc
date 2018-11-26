@@ -148,7 +148,11 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
         else if (psc_type == "Trust") {
             printf("This is a Trust Matrix message");
-            // Parse Trust matrix here
+
+            //Pull out data string and pass to function to parse
+            std::string thisData = wsm->getWsmData();
+            parseTrust(thisData);
+
         }
     }
     else {
@@ -376,4 +380,55 @@ void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
     myStruct.dataPlausibility = pls;
     myStruct.dataBelief = bel;
     trustMap[nodeId] = myStruct;
+}
+
+void Waymart::parseTrust(std::string data){
+    //Put the trust details into the map
+    
+    std::map<int, OutsideOpinion> recievedMap;
+
+
+    std::string nodeIdd;
+    std::string dataPls;
+    std::string dataBel;
+    // = data.substr(0, thisPSC.find(delimiter1));
+    //= data.substr(thisPSC.find(delimiter1) + 2, thisPSC.length() - psc_cat.length() - 2);
+    size_t data_pos = 0;
+    size_t entry_pos = 0;
+    std::string entry;
+
+    while ((data_pos = data.find(delimiter1)) != std::string::npos) {
+        entry = data.substr(0, data_pos);
+        
+        //parse each of the entries here
+        entry_pos = entry.find(delimiter2);
+        nodeId = entry.substr(0, entry_pos);
+        entry.erase(0, entry_pos + delimiter2.length());
+        entry_pos = entry.find(delimiter2);
+        dataPls = entry.substr(0, entry_pos);
+        entry.erase(0, entry_pos + delimiter2.length());
+        dataBel = entry.substr(0, entry_pos);
+
+        data.erase(0, pos + delimiter1.length());
+
+        //Enter data into the map
+        OutsideOpinion newEntry;
+        newEntry.outBelief = dataBel;
+        newEntry.outPlaus = dataPls;
+        newEntry.contributors = 1;
+        recievedMap[nodeId] = newEntry;
+    }
+}
+
+std::string Waymart::createTrustString(){
+    //Iterate through the map to create the string to pass back
+    //THIS IS REALLY BAD SUDO CODE BECAUSE I DON't UNDERSTAND HOW ITERATORS WORK
+    std::string output = "";
+    int current;
+
+    while(iterator.next() != iterator.end()){
+        //Is this legal to do?
+        output = output + current + delimiter2 + trustMap[current].dataPlausibility + delimiter2 + trustMap[current].dataBelief + delimiter1;
+    }
+
 }

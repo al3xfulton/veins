@@ -115,6 +115,9 @@ class Waymart : public BaseWaveApplLayer {
 		virtual void addEntry(int nodeId, bool checkable, bool verified);
 		virtual void modifyEntry(int nodeId, bool checkable, bool verified);
 
+		virtual void parseTrust(std::string data);
+		virtual std::string Waymart::createTrustString();
+
 };
 
 #endif
