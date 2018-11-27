@@ -382,7 +382,7 @@ void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
     trustMap[nodeId] = myStruct;
 }
 
-void Waymart::parseTrust(std::string data){
+std::map<int, OutsideOpinion> Waymart::parseTrust(std::string data){
     //Put the trust details into the map
     
     std::map<int, OutsideOpinion> recievedMap;
@@ -418,17 +418,17 @@ void Waymart::parseTrust(std::string data){
         newEntry.contributors = 1;
         recievedMap[nodeId] = newEntry;
     }
+    
+    return recievedMap;
 }
 
 std::string Waymart::createTrustString(){
     //Iterate through the map to create the string to pass back
-    //THIS IS REALLY BAD SUDO CODE BECAUSE I DON't UNDERSTAND HOW ITERATORS WORK
+
     std::string output = "";
-    int current;
 
-    while(iterator.next() != iterator.end()){
-        //Is this legal to do?
-        output = output + current + delimiter2 + trustMap[current].dataPlausibility + delimiter2 + trustMap[current].dataBelief + delimiter1;
+    for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
+        output = output + it->first + delimiter2 + it->second.dataPlausibility + delimiter2 + it->second.dataBelief + delimiter1;
     }
-
+    return output;
 }
