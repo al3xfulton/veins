@@ -20,6 +20,7 @@
 
 #include "veins/modules/application/traci/Waymart.h"
 #include <stdlib.h>
+#include <random>
 
 Define_Module(Waymart);
 
@@ -75,17 +76,57 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
-        // Check if you can verify the new message
+        // Check if you can verify the new message; I'm assuming you can't ever verify an accident message
         // If you can, verify whether it is true
-        updateMatrix(std::stoi(sender_id), true, true); // Assumes all incoming messages are True
+        updateMatrix(std::stoi(sender_id), false, false); // Assumes all incoming messages are True
         //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
-            iter = reports.find(road_id);
+            float dist_mean;
+            float sigma;
+            double sample;
+            double rerouteThreshold = 0.5;
 
-            if (iter != reports.end()){ // Road ID already in map
+            // we just added it so don't need to check if it's present
+            Trust currentTrust = trustMap[std::stoi(sender_id)];
+
+            outsideIter = outOpinionMap.find(std::stoi(sender_id));
+            // no outside opinion!
+            if(outsideIter == outOpinionMap.end()){
+
+                 dist_mean = (currentTrust.dataBelief+currentTrust.dataPlausibility)/2;
+                 sigma = (currentTrust.dataPlausibility-currentTrust.dataBelief)/6; // this is somewhat arbitrary
+                 sample = getSample(dist_mean, sigma);
+            // we do have a number of outside opinions
+            } else {
+                OutsideOpinion outsideOpinion = outOpinionMap[std::stoi(sender_id)];
+                float total_belief = (currentTrust.dataBelief+outsideOpinion.outBelief*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
+                float total_plaus = (currentTrust.dataPlausibility + outsideOpinion.outPlaus*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
+                dist_mean = (total_belief + total_plaus)/2;
+                sigma = (total_plaus-total_belief)/6;
+                sample = getSample(dist_mean, sigma);
+            }
+
+            if (sample > rerouteThreshold){
+                traciVehicle->changeRoute(road_id, 9999);
+                // Send echo
+                //repeat the received traffic update once in 2 seconds plus some random delay
+                wsm->setSenderAddress(myId);
+                wsm->setSerial(3);
+                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+            }
+
+            //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
+            printf("Generated sample %f with %f mean and %f std. dev\n", sample, dist_mean, sigma);
+
+
+            //iter = reports.find(road_id);
+
+            /* Rachel: I think all of this is for opportunistic "polling" so I'm commenting it out
+             if (iter != reports.end()){ // Road ID already in map
                 //printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
 
+                // Received old message; don't reroute
                 if (std::stoi(time_sent) - std::stoi(iter->second.second) > 300) {
                     //printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     iter->second = std::make_pair(sender_id, time_sent);
@@ -96,6 +137,8 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                     // Don't reroute
                 }
+
+                // Received verification message
                 else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
                     //printf("Vehicle %d verified Accident on: %s\n", myId, road_id.c_str());
 
@@ -111,6 +154,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
                     //printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     // Don't echo, react, or update map
                 }
+                */
             }
             else { // put new thing in map
                 reports[road_id] = std::make_pair(sender_id, time_sent);
@@ -121,7 +165,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
                 scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
             }
 
-        }
+        //}
 
     }
     else if (psc_cat == "Info") {
@@ -154,6 +198,15 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     else {
         //printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
     }
+}
+
+double Waymart::getSample(float mean, float sigma){
+    double sample;
+    std::default_random_engine generator;
+
+    std::normal_distribution<double> distribution(mean, sigma);
+    sample = distribution(generator);
+    return sample;
 }
 
 void Waymart::handleSelfMsg(cMessage* msg) {
@@ -315,9 +368,9 @@ void Waymart::updateMatrix(int nodeId, bool checkable, bool verified){
         modifyEntry(nodeId, checkable, verified);
     }
 
-    for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
-        std::cout << "Vehicle " << myId << ": Key: " << (it->first) << "; Belief: " << (it->second.dataBelief) << "; Plausibility: " << (it->second.dataPlausibility) << "\n";
-    }
+    //for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
+        //std::cout << "Vehicle " << myId << ": Key: " << (it->first) << "; Belief: " << (it->second.dataBelief) << "; Plausibility: " << (it->second.dataPlausibility) << "\n";
+    //}
 }
 
 void Waymart::addEntry(int nodeId, bool checkable, bool verified){
@@ -356,17 +409,16 @@ void Waymart::addEntry(int nodeId, bool checkable, bool verified){
 
 void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
     Trust myStruct = trustMap[nodeId];
-
-    int count = ++ myStruct.numMessages;
-    int numTrue = myStruct.numTrue;
-    int numFalse = myStruct.numFalse;
+    float count = ++ myStruct.numMessages;
+    float numTrue = myStruct.numTrue;
+    float numFalse = myStruct.numFalse;
 
     if (checkable) {
         if (verified) {
-            int numTrue = ++ myStruct.numTrue;
+            float numTrue = ++ myStruct.numTrue;
         }
         else {
-            int numFalse = ++ myStruct.numFalse;
+            float numFalse = ++ myStruct.numFalse;
         }
     }
 
@@ -375,5 +427,7 @@ void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
 
     myStruct.dataPlausibility = pls;
     myStruct.dataBelief = bel;
+    //printf("New values: %f messages sent; %f true; %f false; %f belief; %f plaus\n",
+    //        myStruct.numMessages, myStruct.numTrue, myStruct.numFalse, myStruct.dataBelief, myStruct.dataPlausibility);
     trustMap[nodeId] = myStruct;
 }

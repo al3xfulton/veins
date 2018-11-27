@@ -41,9 +41,9 @@
 struct Trust {
 	float dataPlausibility;
 	float dataBelief;
-	int numMessages;
-	int numTrue;
-	int numFalse;
+	float numMessages;
+	float numTrue;
+	float numFalse;
 };
 
 struct OutsideOpinion {
@@ -114,6 +114,7 @@ class Waymart : public BaseWaveApplLayer {
 		virtual void updateMatrix(int nodeId, bool checkable, bool verified);
 		virtual void addEntry(int nodeId, bool checkable, bool verified);
 		virtual void modifyEntry(int nodeId, bool checkable, bool verified);
+		virtual double getSample(float mean, float sigma);
 
 };
 
