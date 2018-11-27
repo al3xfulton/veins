@@ -442,7 +442,7 @@ std::map<int, OutsideOpinion> Waymart::parseTrust(std::string data){
     std::map<int, OutsideOpinion> recievedMap;
 
 
-    std::string nodeIdd;
+    std::string nodeId;
     std::string dataPls;
     std::string dataBel;
     // = data.substr(0, thisPSC.find(delimiter1));
@@ -463,12 +463,12 @@ std::map<int, OutsideOpinion> Waymart::parseTrust(std::string data){
         entry.erase(0, entry_pos + delimiter2.length());
         dataBel = entry.substr(0, entry_pos);
 
-        data.erase(0, pos + delimiter1.length());
+        data.erase(0, data_pos + delimiter1.length());
 
         //Enter data into the map
         OutsideOpinion newEntry;
-        newEntry.outBelief = dataBel;
-        newEntry.outPlaus = dataPls;
+        newEntry.outBelief = stof(dataBel);
+        newEntry.outPlaus = stof(dataPls);
         newEntry.contributors = 1;
         recievedMap[nodeId] = newEntry;
     }
