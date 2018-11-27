@@ -116,7 +116,7 @@ class Waymart : public BaseWaveApplLayer {
 		virtual void modifyEntry(int nodeId, bool checkable, bool verified);
 		virtual double getSample(float mean, float sigma);
 
-		virtual std::map<int, OutsideOpinion> parseTrust(std::string data);
+		virtual void parseTrust(std::string data);
 		virtual std::string createTrustString();
 
 };

@@ -193,9 +193,10 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         else if (psc_type == "Trust") {
             printf("This is a Trust Matrix message");
             std::map<int, OutsideOpinion> recievedMap;
+
             //Pull out data string and pass to function to parse
             std::string thisData = wsm->getWsmData();
-            //recievedMap = parseTrust(thisData);
+            parseTrust(thisData);
 
         }
     }
@@ -443,15 +444,13 @@ void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
     trustMap[nodeId] = myStruct;
 }
 
-std::map<int, OutsideOpinion> Waymart::parseTrust(std::string data){
+void Waymart::parseTrust(std::string data){
     //Put the trust details into the map
-    
-    std::map<int, OutsideOpinion> recievedMap;
-
 
     std::string nodeId;
-    std::string dataPls;
-    std::string dataBel;
+    std::string belString;
+    std::string plsString;
+
     // = data.substr(0, thisPSC.find(delimiter1));
     //= data.substr(thisPSC.find(delimiter1) + 2, thisPSC.length() - psc_cat.length() - 2);
     size_t data_pos = 0;
@@ -466,21 +465,21 @@ std::map<int, OutsideOpinion> Waymart::parseTrust(std::string data){
         nodeId = entry.substr(0, entry_pos);
         entry.erase(0, entry_pos + delimiter2.length());
         entry_pos = entry.find(delimiter2);
-        dataPls = entry.substr(0, entry_pos);
+        plsString = entry.substr(0, entry_pos);
         entry.erase(0, entry_pos + delimiter2.length());
-        dataBel = entry.substr(0, entry_pos);
+        belString = entry.substr(0, entry_pos);
 
         data.erase(0, data_pos + delimiter1.length());
 
         //Enter data into the map
-        OutsideOpinion newEntry;
-        newEntry.outBelief = stof(dataBel);
-        newEntry.outPlaus = stof(dataPls);
-        newEntry.contributors = 1;
-        recievedMap[nodeId] = newEntry;
+        Backlog newEntry;
+        newEntry.subjectId = stoi(nodeId);
+        newEntry.foreignBelief = stof(belString);
+        newEntry.foreignPlaus = stof(plsString);
+
+        toProcess.push(newEntry);
     }
-    
-    return recievedMap;
+
 }
 
 std::string Waymart::createTrustString(){
