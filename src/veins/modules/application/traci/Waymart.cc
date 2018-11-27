@@ -195,7 +195,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             std::map<int, OutsideOpinion> recievedMap;
             //Pull out data string and pass to function to parse
             std::string thisData = wsm->getWsmData();
-            recievedMap = parseTrust(thisData);
+            //recievedMap = parseTrust(thisData);
 
         }
     }
@@ -269,7 +269,7 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         //Just to make sure that data is being pulled correctly
         std::string data;
         data = createTrustString();
-        printf("Node: %d Data: %s\n", myId, data);
+        printf("Node: %d Data: %s\n", myId, data.c_str());
 
 
         while (left > 0 ) {
@@ -489,7 +489,7 @@ std::string Waymart::createTrustString(){
     std::string output = "";
 
     for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
-        output = output + it->first + delimiter2 + it->second.dataPlausibility + delimiter2 + it->second.dataBelief + delimiter1;
+        output = output + std::to_string(it->first) + delimiter2 + std::to_string(it->second.dataPlausibility) + delimiter2 + std::to_string(it->second.dataBelief) + delimiter1;
     }
     return output;
 }
