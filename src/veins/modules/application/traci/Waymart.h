@@ -58,11 +58,6 @@ struct Backlog {
     float foreignPlaus;
 };
 
-struct OperatingVals {
-    float opBelief;
-    float opPlaus;
-};
-
 class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
@@ -84,6 +79,7 @@ class Waymart : public BaseWaveApplLayer {
 		// For internal opinions about each vehicle (and external?)
 		std::map<int, Trust> trustMap;
 		std::map<int, Trust>::iterator trustIter;
+		int trustUpdateTime;
 
         // For external opinions about each vehicle
         std::map<int, OutsideOpinion> outOpinionMap;
@@ -94,6 +90,7 @@ class Waymart : public BaseWaveApplLayer {
         int updateTime;
         int timeFromUpdate;
         std::queue<Backlog> toProcess;
+
 
         // For reflecting the operational Belief and Plausibility values for each vehicle
         // Don't need this when calculating belief/plausibility at time of decision

@@ -42,6 +42,7 @@ void Waymart::initialize(int stage) {
         timeFromMessage = 0;
 
         updateTime = round(59 * (rand() / RAND_MAX));
+        trustUpdateTime = round(59 * (rand() / RAND_MAX));
         timeFromUpdate = 0;
     }
 }
@@ -117,7 +118,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             }
 
             //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
-            printf("Generated sample %f with %f mean and %f std. dev\n", sample, dist_mean, sigma);
+            //printf("Generated sample %f with %f mean and %f std. dev\n", sample, dist_mean, sigma);
 
 
             //iter = reports.find(road_id);
@@ -191,7 +192,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         }
 
         else if (psc_type == "Trust") {
-            printf("This is a Trust Matrix message");
+            printf("This is a Trust Matrix message\n");
             std::map<int, OutsideOpinion> recievedMap;
 
             //Pull out data string and pass to function to parse
@@ -236,7 +237,27 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
+    if (timeFromUpdate % 60 == trustUpdateTime) {
+        //Just to make sure that data is being pulled correctly
+        std::string data;
+        data = createTrustString();
+        WaveShortMessage* wsm = new WaveShortMessage();
+        populateWSM(wsm);
+        wsm->setPsc(infoTrust.c_str());
+        wsm->setWsmData(data.c_str());
 
+        if (dataOnSch){
+            startService(Channels::SCH2, 42, "Traffic Information Service");
+            //started service and server advertising, schedule message to self to send later
+            scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+        }
+        else {
+              //send right away on CCH, because channel switching is disabled
+               sendDown(wsm);
+        }
+        //printf("Node: %d Data: %s\n", myId, data.c_str());
+
+    }
     if (timeFromMessage >= 30) {
         timeFromMessage = 0;
 
@@ -267,15 +288,12 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         // Don't process entries that come in while we're processing, or we may be stuck forever
         int left = toProcess.size();
 
-        //Just to make sure that data is being pulled correctly
-        std::string data;
-        data = createTrustString();
-        printf("Node: %d Data: %s\n", myId, data.c_str());
 
 
         while (left > 0 ) {
             Backlog current = toProcess.front();
             outsideIter = outOpinionMap.find(current.subjectId);
+            //printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, current.foreignBelief, current.foreignPlaus);
 
             if (outsideIter == outOpinionMap.end()) {
                 // new entry
@@ -288,11 +306,15 @@ void Waymart::handlePositionUpdate(cObject* obj) {
             else {
                 // update existing entry
                 OutsideOpinion oldOp = outsideIter->second;
+                printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, oldOp.outBelief, oldOp.outPlaus);
+
                 OutsideOpinion newOp;
                 newOp.outBelief = ((oldOp.outBelief * oldOp.contributors) + current.foreignBelief) / (oldOp.contributors + 1);
                 newOp.outPlaus = ((oldOp.outPlaus * oldOp.contributors) + current.foreignPlaus) / (oldOp.contributors + 1);
                 newOp.contributors = oldOp.contributors + 1;
                 outsideIter->second = newOp;
+                printf("Updated Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, newOp.outBelief, newOp.outPlaus);
+
             }
 
             // pop it
