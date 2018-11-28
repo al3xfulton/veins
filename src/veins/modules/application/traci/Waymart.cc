@@ -42,6 +42,7 @@ void Waymart::initialize(int stage) {
         timeFromMessage = 0;
 
         updateTime = round(59 * (rand() / RAND_MAX));
+        trustUpdateTime = round(59 * (rand() / RAND_MAX));
         timeFromUpdate = 0;
     }
 }
@@ -236,7 +237,12 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
-
+    if (timeFromUpdate % 60 == trustUpdateTime) {
+        //Just to make sure that data is being pulled correctly
+        std::string data;
+        data = createTrustString();
+        printf("Node: %d Data: %s\n", myId, data.c_str());
+    }
     if (timeFromMessage >= 30) {
         timeFromMessage = 0;
 
@@ -267,10 +273,6 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         // Don't process entries that come in while we're processing, or we may be stuck forever
         int left = toProcess.size();
 
-        //Just to make sure that data is being pulled correctly
-        std::string data;
-        data = createTrustString();
-        printf("Node: %d Data: %s\n", myId, data.c_str());
 
 
         while (left > 0 ) {
