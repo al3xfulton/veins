@@ -23,6 +23,8 @@
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 #include <string.h>
+#include <stdlib.h>
+#include <random>
 
 /**
  * @brief
@@ -61,6 +63,7 @@ struct Backlog {
 class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
+
 	protected:
 		simtime_t lastDroveAt;
 		bool sentMessage;
@@ -76,10 +79,17 @@ class Waymart : public BaseWaveApplLayer {
 		std::string delimiter1;
 		std::string delimiter2;
 
+		// For scheduling at random offsets
+		//std::uniform_int_distribution<int> unif(0, 59);
+
+		// Selection of trustworthiness from normal distribution
+		std::default_random_engine generator;
+
 		// For internal opinions about each vehicle (and external?)
 		std::map<int, Trust> trustMap;
 		std::map<int, Trust>::iterator trustIter;
 		int trustUpdateTime;
+		int timeFromTrustUpdate;
 
         // For external opinions about each vehicle
         std::map<int, OutsideOpinion> outOpinionMap;
@@ -90,11 +100,6 @@ class Waymart : public BaseWaveApplLayer {
         int updateTime;
         int timeFromUpdate;
         std::queue<Backlog> toProcess;
-
-
-        // For reflecting the operational Belief and Plausibility values for each vehicle
-        // Don't need this when calculating belief/plausibility at time of decision
-        //std::map<int, OperatingVals> operationalResults;
 
 		// For tracking Accident messages (used for Simple Verification)
 		int timeFromMessage;

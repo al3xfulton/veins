@@ -41,9 +41,11 @@ void Waymart::initialize(int stage) {
         delimiter2 = "::";
         timeFromMessage = 0;
 
-        updateTime = round(59 * (rand() / RAND_MAX));
-        trustUpdateTime = round(59 * (rand() / RAND_MAX));
+        updateTime = 40;
+        trustUpdateTime = 20;
+        //printf("%d %d updateTime %d trustUpdateTime", myId, updateTime, trustUpdateTime);
         timeFromUpdate = 0;
+        timeFromTrustUpdate = 0;
     }
 }
 
@@ -80,7 +82,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         // Check if you can verify the new message; I'm assuming you can't ever verify an accident message
         // If you can, verify whether it is true
         updateMatrix(std::stoi(sender_id), false, false); // Assumes we can't verify accident message
-        //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
+        printf("From %d: %s reports accident on %s at time %s \n", myId, sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
             float dist_mean;
@@ -92,14 +94,15 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             Trust currentTrust = trustMap[std::stoi(sender_id)];
 
             outsideIter = outOpinionMap.find(std::stoi(sender_id));
+
             // no outside opinion!
             if(outsideIter == outOpinionMap.end()){
-
                  dist_mean = (currentTrust.dataBelief+currentTrust.dataPlausibility)/2;
                  sigma = (currentTrust.dataPlausibility-currentTrust.dataBelief)/6; // this is somewhat arbitrary
                  sample = getSample(dist_mean, sigma);
+            }
             // we do have a number of outside opinions
-            } else {
+            else {
                 OutsideOpinion outsideOpinion = outOpinionMap[std::stoi(sender_id)];
                 float total_belief = (currentTrust.dataBelief+outsideOpinion.outBelief*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
                 float total_plaus = (currentTrust.dataPlausibility + outsideOpinion.outPlaus*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
@@ -118,7 +121,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             }
 
             //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
-            //printf("Generated sample %f with %f mean and %f std. dev\n", sample, dist_mean, sigma);
+            printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
 
 
             //iter = reports.find(road_id);
@@ -192,7 +195,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         }
 
         else if (psc_type == "Trust") {
-            printf("This is a Trust Matrix message\n");
+            //printf("This is a Trust Matrix message\n");
             std::map<int, OutsideOpinion> recievedMap;
 
             //Pull out data string and pass to function to parse
@@ -207,11 +210,9 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 }
 
 double Waymart::getSample(float mean, float sigma){
-    double sample;
-    std::default_random_engine generator;
 
     std::normal_distribution<double> distribution(mean, sigma);
-    sample = distribution(generator);
+    double sample = distribution(generator);
     return sample;
 }
 
@@ -237,7 +238,9 @@ void Waymart::handleSelfMsg(cMessage* msg) {
 
 void Waymart::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
-    if (timeFromUpdate % 60 == trustUpdateTime) {
+    if (timeFromTrustUpdate % 60 == trustUpdateTime) {
+        timeFromTrustUpdate = trustUpdateTime + 1;
+
         //Just to make sure that data is being pulled correctly
         std::string data;
         data = createTrustString();
@@ -252,12 +255,15 @@ void Waymart::handlePositionUpdate(cObject* obj) {
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
         }
         else {
-              //send right away on CCH, because channel switching is disabled
-               sendDown(wsm);
+            //send right away on CCH, because channel switching is disabled
+            sendDown(wsm);
         }
         //printf("Node: %d Data: %s\n", myId, data.c_str());
-
     }
+    else {
+            timeFromTrustUpdate ++;
+    }
+
     if (timeFromMessage >= 30) {
         timeFromMessage = 0;
 
@@ -286,9 +292,9 @@ void Waymart::handlePositionUpdate(cObject* obj) {
 
         // Perform Processing
         // Don't process entries that come in while we're processing, or we may be stuck forever
+        timeFromUpdate = updateTime + 1;
+
         int left = toProcess.size();
-
-
 
         while (left > 0 ) {
             Backlog current = toProcess.front();
@@ -306,14 +312,14 @@ void Waymart::handlePositionUpdate(cObject* obj) {
             else {
                 // update existing entry
                 OutsideOpinion oldOp = outsideIter->second;
-                printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, oldOp.outBelief, oldOp.outPlaus);
+                //printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, oldOp.outBelief, oldOp.outPlaus);
 
                 OutsideOpinion newOp;
                 newOp.outBelief = ((oldOp.outBelief * oldOp.contributors) + current.foreignBelief) / (oldOp.contributors + 1);
                 newOp.outPlaus = ((oldOp.outPlaus * oldOp.contributors) + current.foreignPlaus) / (oldOp.contributors + 1);
                 newOp.contributors = oldOp.contributors + 1;
                 outsideIter->second = newOp;
-                printf("Updated Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, newOp.outBelief, newOp.outPlaus);
+                //printf("Updated Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, newOp.outBelief, newOp.outPlaus);
 
             }
 
