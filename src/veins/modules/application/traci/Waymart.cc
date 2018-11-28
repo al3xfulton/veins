@@ -113,12 +113,13 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
             if (sample > rerouteThreshold){
                 traciVehicle->changeRoute(road_id, 9999);
-                // Send echo
-                //repeat the received traffic update once in 2 seconds plus some random delay
-                wsm->setSenderAddress(myId);
-                wsm->setSerial(3);
-                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
             }
+
+            // Send echo
+            //repeat the received traffic update once in 2 seconds plus some random delay
+            wsm->setSenderAddress(myId);
+            wsm->setSerial(3);
+            scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
 
             //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
             printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
@@ -363,8 +364,6 @@ void Waymart::handlePositionUpdate(cObject* obj) {
                 }
             }
         }
-
-
     }
     else {
         lastDroveAt = simTime();
