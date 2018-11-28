@@ -118,7 +118,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             }
 
             //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
-            printf("Generated sample %f with %f mean and %f std. dev\n", sample, dist_mean, sigma);
+            //printf("Generated sample %f with %f mean and %f std. dev\n", sample, dist_mean, sigma);
 
 
             //iter = reports.find(road_id);
@@ -241,7 +241,22 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         //Just to make sure that data is being pulled correctly
         std::string data;
         data = createTrustString();
-        printf("Node: %d Data: %s\n", myId, data.c_str());
+        WaveShortMessage* wsm = new WaveShortMessage();
+        populateWSM(wsm);
+        wsm->setPsc(infoTrust.c_str());
+        wsm->setWsmData(data.c_str());
+
+        if (dataOnSch){
+            startService(Channels::SCH2, 42, "Traffic Information Service");
+            //started service and server advertising, schedule message to self to send later
+            scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+        }
+        else {
+              //send right away on CCH, because channel switching is disabled
+               sendDown(wsm);
+        }
+        //printf("Node: %d Data: %s\n", myId, data.c_str());
+
     }
     if (timeFromMessage >= 30) {
         timeFromMessage = 0;
