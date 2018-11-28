@@ -192,7 +192,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
         }
 
         else if (psc_type == "Trust") {
-            printf("This is a Trust Matrix message");
+            printf("This is a Trust Matrix message\n");
             std::map<int, OutsideOpinion> recievedMap;
 
             //Pull out data string and pass to function to parse
@@ -293,6 +293,7 @@ void Waymart::handlePositionUpdate(cObject* obj) {
         while (left > 0 ) {
             Backlog current = toProcess.front();
             outsideIter = outOpinionMap.find(current.subjectId);
+            //printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, current.foreignBelief, current.foreignPlaus);
 
             if (outsideIter == outOpinionMap.end()) {
                 // new entry
