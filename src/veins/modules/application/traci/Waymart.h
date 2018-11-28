@@ -58,11 +58,6 @@ struct Backlog {
     float foreignPlaus;
 };
 
-struct OperatingVals {
-    float opBelief;
-    float opPlaus;
-};
-
 class Waymart : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
