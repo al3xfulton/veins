@@ -78,7 +78,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
         // Check if you can verify the new message; I'm assuming you can't ever verify an accident message
         // If you can, verify whether it is true
-        updateMatrix(std::stoi(sender_id), false, false); // Assumes all incoming messages are True
+        updateMatrix(std::stoi(sender_id), false, false); // Assumes we can't verify accident message
         //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
