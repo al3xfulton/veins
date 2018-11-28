@@ -306,14 +306,14 @@ void Waymart::handlePositionUpdate(cObject* obj) {
             else {
                 // update existing entry
                 OutsideOpinion oldOp = outsideIter->second;
-                printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, oldOp.foreignBelief, oldOp.foreignPlaus);
+                printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, oldOp.outBelief, oldOp.outPlaus);
 
                 OutsideOpinion newOp;
                 newOp.outBelief = ((oldOp.outBelief * oldOp.contributors) + current.foreignBelief) / (oldOp.contributors + 1);
                 newOp.outPlaus = ((oldOp.outPlaus * oldOp.contributors) + current.foreignPlaus) / (oldOp.contributors + 1);
                 newOp.contributors = oldOp.contributors + 1;
                 outsideIter->second = newOp;
-                printf("Updated Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, newOp.foreignBelief, newOp.foreignPlaus);
+                printf("Updated Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, newOp.outBelief, newOp.outPlaus);
 
             }
 
