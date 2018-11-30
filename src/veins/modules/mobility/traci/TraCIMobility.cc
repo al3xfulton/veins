@@ -44,6 +44,7 @@ void TraCIMobility::Statistics::initialize()
 	maxSpeed = -MY_INFINITY;
 	totalDistance = 0;
 	totalCO2Emission = 0;
+
 }
 
 void TraCIMobility::Statistics::watch(cSimpleModule& )
@@ -124,6 +125,7 @@ void TraCIMobility::initialize(int stage)
 			simtime_t fakeAccidentStart = par("fakeAccidentStart");
 			startFakeAccidentMsg = new cMessage("scheduledFakeAccident");
 			stopFakeAccidentMsg = new cMessage("scheduledFakeAccidentResolved");
+			fake_accident_location = "10886775#2";
 			scheduleAt(simTime() + fakeAccidentStart, startFakeAccidentMsg);
 		}
 	}
@@ -169,7 +171,7 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 	}
 	else if(msg == startFakeAccidentMsg) {
 		//Need some good way to trigger the messages being sent
-		this->savedRoadId = this->road_id;
+		this->savedRoadId = fake_accident_location; //this->road_id;
 		fakeState = 1;
 		simtime_t fakeAccidentDuration = par("fakeAccidentDuration");
 		scheduleAt(simTime() + fakeAccidentDuration, stopFakeAccidentMsg);

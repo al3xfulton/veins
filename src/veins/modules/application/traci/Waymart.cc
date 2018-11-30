@@ -47,6 +47,7 @@ void Waymart::initialize(int stage) {
         timeFromUpdate = 0;
         timeFromTrustUpdate = 0;
     }
+    generator.seed(17);
 }
 
 void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
@@ -88,7 +89,7 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
             float dist_mean;
             float sigma;
             double sample;
-            double rerouteThreshold = 0.5;
+            double rerouteThreshold = 0.45;
 
             // we just added it so don't need to check if it's present
             Trust currentTrust = trustMap[std::stoi(sender_id)];
@@ -115,11 +116,14 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
                 traciVehicle->changeRoute(road_id, 9999);
             }
 
-            // Send echo
-            //repeat the received traffic update once in 2 seconds plus some random delay
-            wsm->setSenderAddress(myId);
-            wsm->setSerial(3);
-            scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+            if (std::stoi(time_sent) >= simTime().dbl()-1){
+                // Send echo
+                //repeat the received traffic update once in 2 seconds plus some random delay
+                wsm->setSenderAddress(myId);
+                wsm->setSerial(3);
+                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+            }
+
 
             //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
             printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);

@@ -85,6 +85,7 @@ class Waymart : public BaseWaveApplLayer {
 		// Selection of trustworthiness from normal distribution
 		std::default_random_engine generator;
 
+
 		// For internal opinions about each vehicle (and external?)
 		std::map<int, Trust> trustMap;
 		std::map<int, Trust>::iterator trustIter;

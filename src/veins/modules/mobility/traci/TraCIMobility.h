@@ -64,6 +64,7 @@ class TraCIMobility : public BaseMobility
 				double totalDistance; /**< for statistics: total distance travelled */
 				double totalCO2Emission; /**< for statistics: total CO2 emission */
 
+
 				void initialize();
 				void watch(cSimpleModule& module);
 				void recordScalars(cSimpleModule& module);
@@ -181,6 +182,7 @@ class TraCIMobility : public BaseMobility
 		cMessage* startFakeAccidentMsg;
 		cMessage* stopFakeAccidentMsg;
 		double fakeState;
+		std::string fake_accident_location;
 
 
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */
