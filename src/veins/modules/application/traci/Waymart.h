@@ -76,8 +76,13 @@ class Waymart : public BaseWaveApplLayer {
 		std::string dataField1;
 		std::string dataField2;
 		std::string dataField3;
+		std::string dataField4;
 		std::string delimiter1;
 		std::string delimiter2;
+
+		//Track whether accident messages have been recieved yet
+		int accidentMessageCount;
+		std::map<int, int> recievedMap;
 
 		// For scheduling at random offsets
 		//std::uniform_int_distribution<int> unif(0, 59);

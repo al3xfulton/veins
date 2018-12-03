@@ -37,9 +37,11 @@ void Waymart::initialize(int stage) {
         dataField1 = "origSender::";
         dataField2 = "**mData::";
         dataField3 = "**mData2::";
+        dataField4 = "**mData3::";
         delimiter1 = "**";
         delimiter2 = "::";
         timeFromMessage = 0;
+        accidentMessageCount = 0;
 
         updateTime = 40;
         trustUpdateTime = 20;
@@ -71,15 +73,20 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     if(psc_cat == "Alert" && psc_type == "Accident") {
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
-        std::string temp = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - data_sender.length() - 2);
+        std::string temp1 = thisData.substr(thisData.find(delimiter1) + 2, thisData.length() - data_sender.length() - 2);
 
-        std::string data_road = temp.substr(0, temp.find(delimiter1));
-        std::string data_time = temp.substr(temp.find(delimiter1) + 2, temp.length() - data_road.length() - 2);
+        std::string data_road = temp1.substr(0, temp1.find(delimiter1));
+        std::string temp2 = temp1.substr(temp1.find(delimiter1) + 2, temp1.length() - data_road.length() - 2);
+        
+        std::string data_time = temp2.substr(0, temp2.find(delimiter1));
+        std::string data_nonce = temp2.substr(temp2.find(delimiter1) + 2, temp2.length());
 
         std::string sender_id = data_sender.substr(data_sender.find(delimiter2) + 2, data_sender.length()-dataField1.length());
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
+        std::string message_id = data_nonce.substr(data_nonce.find(delimiter2) + 2, data_nonce.length() - (dataField4.length()-2));
 
+        printf("This is an accident %s %s %s\n", road_id.c_str(), time_sent.c_str(), message_id.c_str());
         // Check if you can verify the new message; I'm assuming you can't ever verify an accident message
         // If you can, verify whether it is true
         updateMatrix(std::stoi(sender_id), false, false); // Assumes we can't verify accident message
@@ -353,7 +360,8 @@ void Waymart::handlePositionUpdate(cObject* obj) {
                 WaveShortMessage* wsm = new WaveShortMessage();
                 populateWSM(wsm);
                 wsm->setPsc(alertAccident.c_str());
-                std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + (simTime().str());
+                std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + (simTime().str()) + dataField4 + std::to_string(accidentMessageCount);
+                accidentMessageCount = accidentMessageCount + 1;
                 wsm->setWsmData(filler.c_str());
 
                 //host is standing still due to crash
@@ -383,7 +391,8 @@ void Waymart::handlePositionUpdate(cObject* obj) {
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
             wsm->setPsc(alertAccident.c_str());
-            std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getSavedRoadId().c_str() + dataField3 + (simTime().str()));
+            std::string filler = dataField1 + std::to_string(myId) + dataField2 + mobility->getSavedRoadId().c_str() + dataField3 + (simTime().str()) + dataField4 + std::to_string(accidentMessageCount);
+            accidentMessageCount = accidentMessageCount + 1;
             wsm->setWsmData(filler.c_str());
 
             // I have no idea what this means
@@ -481,12 +490,18 @@ void Waymart::parseTrust(std::string data){
     std::string nodeId;
     std::string belString;
     std::string plsString;
+    int messageId;
 
     // = data.substr(0, thisPSC.find(delimiter1));
     //= data.substr(thisPSC.find(delimiter1) + 2, thisPSC.length() - psc_cat.length() - 2);
     size_t data_pos = 0;
     size_t entry_pos = 0;
     std::string entry;
+
+    if ((data_pos = data.find(delimiter1)) != std::string::npos) {
+        messageId = stoi(data.substr(0, data_pos));
+        data.erase(0, data_pos + delimiter1.length());
+    }
 
     while ((data_pos = data.find(delimiter1)) != std::string::npos) {
         entry = data.substr(0, data_pos);
@@ -517,6 +532,8 @@ std::string Waymart::createTrustString(){
     //Iterate through the map to create the string to pass back
 
     std::string output = "";
+    output = std::to_string(accidentMessageCount) + delimiter1;
+    accidentMessageCount = accidentMessageCount + 1;
 
     for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
         output = output + std::to_string(it->first) + delimiter2 + std::to_string(it->second.dataPlausibility) + delimiter2 + std::to_string(it->second.dataBelief) + delimiter1;
