@@ -130,6 +130,7 @@ void ART::onWSM(WaveShortMessage* wsm) {
 
                 if (sample > rerouteThreshold){
                     traciVehicle->changeRoute(road_id, 9999);
+                    printf("ID %d reroute \n", myId);
                 }
 
                 if (std::stoi(time_sent) >= simTime().dbl()-1){

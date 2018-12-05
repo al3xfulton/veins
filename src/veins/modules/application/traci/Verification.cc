@@ -96,6 +96,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
 
                     iter->second = std::make_pair(sender_id, time_sent);
                     traciVehicle->changeRoute(road_id, 9999);
+                    printf("ID %d reroute \n", myId);
                     // Send echo
                     //repeat the received traffic update once in 2 seconds plus some random delay
                     wsm->setSenderAddress(myId);

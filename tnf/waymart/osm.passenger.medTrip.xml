@@ -7,12 +7,12 @@
     </vType>
     
     <trip id="veh0" depart="0.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
-    <trip id="veh1" depart="15.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
-    <trip id="veh2" depart="20.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
-    <trip id="veh3" depart="25.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh1" depart="12.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh2" depart="22.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh3" depart="28.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
     <trip id="veh4" depart="30.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
-	<trip id="veh5" depart="33.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
-    <trip id="veh6" depart="36.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh5" depart="35.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh6" depart="37.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
     <trip id="veh7" depart="39.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
     <trip id="veh8" depart="42.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
     <trip id="veh9" depart="45.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
