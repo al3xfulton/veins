@@ -70,16 +70,16 @@ void Verification::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
-        printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
+        //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
             iter = reports.find(road_id);
 
             if (iter != reports.end()){ // Road ID already in map
-                printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
+                //printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
 
                 if (std::stoi(time_sent) - std::stoi(iter->second.second) > 300) {
-                    printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
+                    //printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     iter->second = std::make_pair(sender_id, time_sent);
                     // Echo
                     //repeat the received traffic update once in 2 seconds plus some random delay
@@ -89,7 +89,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                     // Don't reroute
                 }
                 else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
-                    printf("Vehicle %d verified Accident on: %s\n", myId, road_id.c_str());
+                    //printf("Vehicle %d verified Accident on: %s\n", myId, road_id.c_str());
 
                     iter->second = std::make_pair(sender_id, time_sent);
                     traciVehicle->changeRoute(road_id, 9999);
@@ -100,7 +100,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                 }
                 else { // An echo of a recent message or a repeat from the original sender
-                    printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
+                    //printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     // Don't echo, react, or update map
                 }
             }
@@ -117,7 +117,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
 
     }
     else if (psc_cat == "Info" && psc_type == "Weather") { // can check here for benign Info updates
-        printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
+        //printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
 
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
@@ -130,10 +130,10 @@ void Verification::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
 
-        printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
+        //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
     }
     else {
-        printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
+        //printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
     }
 }
 

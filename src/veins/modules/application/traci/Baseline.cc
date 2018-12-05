@@ -45,7 +45,8 @@ void Baseline::onWSA(WaveServiceAdvertisment* wsa) {
 void Baseline::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
-    if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
+    if (mobility->getRoadId()[0] != ':' && wsm->getSenderAddress() != myId) traciVehicle->changeRoute(wsm->getWsmData(), 9999);
+    printf("ID %d reroute \n", myId);
     if (!sentMessage) {
         sentMessage = true;
         //repeat the received traffic update once in 2 seconds plus some random delay
