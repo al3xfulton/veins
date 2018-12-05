@@ -18,8 +18,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#ifndef Waymart_H
-#define Waymart_H
+#ifndef ART_H
+#define ART_H
 
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 #include <string.h>
@@ -60,7 +60,7 @@ struct Backlog {
     float foreignPlaus;
 };
 
-class Waymart : public BaseWaveApplLayer {
+class ART : public BaseWaveApplLayer {
 	public:
 		virtual void initialize(int stage);
 

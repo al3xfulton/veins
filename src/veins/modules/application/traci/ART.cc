@@ -18,13 +18,13 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "veins/modules/application/traci/Waymart.h"
+#include "veins/modules/application/traci/ART.h"
 #include <stdlib.h>
 #include <random>
 
-Define_Module(Waymart);
+Define_Module(ART);
 
-void Waymart::initialize(int stage) {
+void ART::initialize(int stage) {
     BaseWaveApplLayer::initialize(stage);
     if (stage == 0) {
         sentMessage = false;
@@ -52,7 +52,7 @@ void Waymart::initialize(int stage) {
     generator.seed(17);
 }
 
-void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
+void ART::onWSA(WaveServiceAdvertisment* wsa) {
     if (currentSubscribedServiceId == -1) {
         mac->changeServiceChannel(wsa->getTargetChannel());
         currentSubscribedServiceId = wsa->getPsid();
@@ -63,7 +63,7 @@ void Waymart::onWSA(WaveServiceAdvertisment* wsa) {
     }
 }
 
-void Waymart::onWSM(WaveShortMessage* wsm) {
+void ART::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
     std::string thisPSC = wsm->getPsc();
@@ -231,14 +231,14 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
     }
 }
 
-double Waymart::getSample(float mean, float sigma){
+double ART::getSample(float mean, float sigma){
 
     std::normal_distribution<double> distribution(mean, sigma);
     double sample = distribution(generator);
     return sample;
 }
 
-void Waymart::handleSelfMsg(cMessage* msg) {
+void ART::handleSelfMsg(cMessage* msg) {
     if (WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg)) {
         //send this message on the service channel until the counter is 3 or higher.
         //this code only runs when channel switching is enabled
@@ -258,7 +258,7 @@ void Waymart::handleSelfMsg(cMessage* msg) {
     }
 }
 
-void Waymart::handlePositionUpdate(cObject* obj) {
+void ART::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
     if (timeFromTrustUpdate % 60 == trustUpdateTime) {
         timeFromTrustUpdate = trustUpdateTime + 1;
@@ -421,7 +421,7 @@ void Waymart::handlePositionUpdate(cObject* obj) {
 
 // Checkable denotes whether we personally could see if the data was True or False
 // If the data was checkable, Verified denotes whether it was successfully verified as True
-void Waymart::updateMatrix(int nodeId, bool checkable, bool verified){
+void ART::updateMatrix(int nodeId, bool checkable, bool verified){
     trustIter = trustMap.find(nodeId);
     if(trustIter == trustMap.end()){
         addEntry(nodeId, checkable, verified);
@@ -435,7 +435,7 @@ void Waymart::updateMatrix(int nodeId, bool checkable, bool verified){
     //}
 }
 
-void Waymart::addEntry(int nodeId, bool checkable, bool verified){
+void ART::addEntry(int nodeId, bool checkable, bool verified){
 
     Trust temp;
     //temp.dataTrust = (float)((rand()%20)+80)/100;
@@ -469,7 +469,7 @@ void Waymart::addEntry(int nodeId, bool checkable, bool verified){
     trustMap[nodeId] = temp;
 }
 
-void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
+void ART::modifyEntry(int nodeId, bool checkable, bool verified){
     Trust myStruct = trustMap[nodeId];
     float count = ++ myStruct.numMessages;
     float numTrue = myStruct.numTrue;
@@ -494,7 +494,7 @@ void Waymart::modifyEntry(int nodeId, bool checkable, bool verified){
     trustMap[nodeId] = myStruct;
 }
 
-void Waymart::parseTrust(std::string data){
+void ART::parseTrust(std::string data){
     //Put the trust details into the map
 
     std::string nodeId;
@@ -538,7 +538,7 @@ void Waymart::parseTrust(std::string data){
 
 }
 
-std::string Waymart::createTrustString(){
+std::string ART::createTrustString(){
     //Iterate through the map to create the string to pass back
 
     std::string output = "";

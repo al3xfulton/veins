@@ -21,8 +21,8 @@
 package org.car2x.veins.modules.application.traci;
 import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
 
-simple Waymart extends BaseWaveApplLayer
+simple ART extends BaseWaveApplLayer
 {
-    @class(Waymart);
+    @class(ART);
     @display("i=block/app2");
 }
