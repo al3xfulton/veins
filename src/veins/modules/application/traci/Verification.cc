@@ -37,6 +37,7 @@ void Verification::initialize(int stage) {
         delimiter1 = "**";
         delimiter2 = "::";
         timeFromMessage = 0;
+        messageCount = 0;
     }
 }
 
@@ -70,22 +71,24 @@ void Verification::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
-        printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
+        //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
             iter = reports.find(road_id);
 
             if (iter != reports.end()){ // Road ID already in map
-                printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
+                //printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
 
                 if (std::stoi(time_sent) - std::stoi(iter->second.second) > 300) {
-                    printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
+                    //printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     iter->second = std::make_pair(sender_id, time_sent);
                     // Echo
                     //repeat the received traffic update once in 2 seconds plus some random delay
                     wsm->setSenderAddress(myId);
                     wsm->setSerial(3);
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                    messageCount += 1;
+                    printf("Node Id: %d Count: %d\n", myId, messageCount);
                     // Don't reroute
                 }
                 else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
@@ -98,9 +101,11 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                     wsm->setSenderAddress(myId);
                     wsm->setSerial(3);
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                    messageCount += 1;
+                    printf("Node Id: %d Count: %d\n", myId, messageCount);
                 }
                 else { // An echo of a recent message or a repeat from the original sender
-                    printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
+                    //printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     // Don't echo, react, or update map
                 }
             }
@@ -111,13 +116,15 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                 wsm->setSenderAddress(myId);
                 wsm->setSerial(3);
                 scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                messageCount += 1;
+                printf("Node Id: %d Count: %d\n", myId, messageCount);
             }
 
         }
 
     }
     else if (psc_cat == "Info" && psc_type == "Weather") { // can check here for benign Info updates
-        printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
+        //printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
 
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
@@ -130,10 +137,10 @@ void Verification::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
 
-        printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
+        //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
     }
     else {
-        printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
+        //printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
     }
 }
 
@@ -187,16 +194,16 @@ void Verification::handlePositionUpdate(cObject* obj) {
     // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {
         if (myId == 13 || myId == 7) {
-            printf("%d is at a stand still \n", myId);
+            //printf("%d is at a stand still \n", myId);
         }
 
         if (simTime() - lastDroveAt >= 10) {
             if (myId == 13 || myId == 7) {
-                printf("%d hasn't moved in a while; SM is %d \n", myId, sentMessage);
+                //printf("%d hasn't moved in a while; SM is %d \n", myId, sentMessage);
             }
 
             if (sentMessage == false) {
-                printf("%d prepping accident message \n", myId);
+                //printf("%d prepping accident message \n", myId);
                 findHost()->getDisplayString().updateWith("r=16,red");
                 sentMessage = true;
 
@@ -205,6 +212,8 @@ void Verification::handlePositionUpdate(cObject* obj) {
                 wsm->setPsc(alertAccident.c_str());
                 std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + (simTime().str());
                 wsm->setWsmData(filler.c_str());
+                messageCount += 1;
+                printf("Node Id: %d Count: %d\n", myId, messageCount);
 
                 //host is standing still due to crash
                 if (dataOnSch) {
@@ -226,7 +235,7 @@ void Verification::handlePositionUpdate(cObject* obj) {
         // no crash - check for trigger for fake crash
         //printf("%d about to send accident message \n", myId);
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
-            printf("%d prepping accident message \n", myId);
+            //printf("%d prepping accident message \n", myId);
 
             findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
             sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
@@ -237,7 +246,8 @@ void Verification::handlePositionUpdate(cObject* obj) {
             wsm->setPsc(alertAccident.c_str());
             std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getSavedRoadId().c_str() + dataField3 + (simTime().str()));
             wsm->setWsmData(filler.c_str());
-
+            messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
             // I have no idea what this means
             if (dataOnSch) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");

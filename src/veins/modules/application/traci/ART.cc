@@ -214,6 +214,8 @@ void ART::handleSelfMsg(cMessage* msg) {
         //this code only runs when channel switching is enabled
         sendDown(wsm->dup());
         wsm->setSerial(wsm->getSerial() +1);
+        //messageCount += 1;
+        //printf("Node Id: %d Count: %d\n", myId, messageCount);
         if (wsm->getSerial() >= 3) {
             //stop service advertisements
             stopService();
@@ -221,8 +223,7 @@ void ART::handleSelfMsg(cMessage* msg) {
         }
         else {
             scheduleAt(simTime()+1, wsm);
-            messageCount += 1;
-            printf("Node Id: %d Count: %d\n", myId, messageCount);
+
         }
     }
     else {
@@ -242,13 +243,14 @@ void ART::handlePositionUpdate(cObject* obj) {
         populateWSM(wsm);
         wsm->setPsc(infoTrust.c_str());
         wsm->setWsmData(data.c_str());
+        messageCount += 1;
+        printf("Node Id: %d Count: %d\n", myId, messageCount);
 
         if (dataOnSch){
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
-            messageCount += 1;
-            printf("Node Id: %d Count: %d\n", myId, messageCount);
+
         }
         else {
             //send right away on CCH, because channel switching is disabled
@@ -268,14 +270,15 @@ void ART::handlePositionUpdate(cObject* obj) {
         wsm->setPsc(infoWeather.c_str());
         std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + ("rain");
         wsm->setWsmData(filler.c_str());
+        messageCount += 1;
+        printf("Node Id: %d Count: %d\n", myId, messageCount);
 
         //host is standing still due to crash
         if (dataOnSch) {
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
-            messageCount += 1;
-            printf("Node Id: %d Count: %d\n", myId, messageCount);
+
         }
         else {
             //send right away on CCH, because channel switching is disabled
@@ -349,14 +352,15 @@ void ART::handlePositionUpdate(cObject* obj) {
                 std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + (simTime().str()) + dataField4 + std::to_string(accidentMessageCount);
                 accidentMessageCount = accidentMessageCount + 1;
                 wsm->setWsmData(filler.c_str());
+                messageCount += 1;
+                printf("Node Id: %d Count: %d\n", myId, messageCount);
 
                 //host is standing still due to crash
                 if (dataOnSch) {
                     startService(Channels::SCH2, 42, "Traffic Information Service");
                     //started service and server advertising, schedule message to self to send later
                     scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
-                    messageCount += 1;
-                    printf("Node Id: %d Count: %d\n", myId, messageCount);
+
                 }
                 else {
                     //send right away on CCH, because channel switching is disabled
@@ -382,14 +386,15 @@ void ART::handlePositionUpdate(cObject* obj) {
             std::string filler = dataField1 + std::to_string(myId) + dataField2 + mobility->getSavedRoadId().c_str() + dataField3 + (simTime().str()) + dataField4 + std::to_string(accidentMessageCount);
             accidentMessageCount = accidentMessageCount + 1;
             wsm->setWsmData(filler.c_str());
+            messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
 
             // I have no idea what this means
             if (dataOnSch) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later
                 scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
-                messageCount += 1;
-                printf("Node Id: %d Count: %d\n", myId, messageCount);
+
             }
             else {
                 //send right away on CCH, because channel switching is disabled
