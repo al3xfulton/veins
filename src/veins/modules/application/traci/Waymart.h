@@ -83,6 +83,7 @@ class Waymart : public BaseWaveApplLayer {
 		//Track whether accident messages have been recieved yet
 		int accidentMessageCount;
 		std::map<int, int> recievedMap;
+		std::map<int, int>::iterator recievedIter;
 
 		// For scheduling at random offsets
 		//std::uniform_int_distribution<int> unif(0, 59);

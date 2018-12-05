@@ -42,7 +42,6 @@ void Waymart::initialize(int stage) {
         delimiter2 = "::";
         timeFromMessage = 0;
         accidentMessageCount = 0;
-        recievedMap
 
         updateTime = 40;
         trustUpdateTime = 20;
@@ -104,8 +103,14 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
             outsideIter = outOpinionMap.find(std::stoi(sender_id));
 
-            int cur_max = recievedMap.find(sender_id); //Check if this message has been recieved before, don't process if vehicle/message id pair exists
-            if(cur_max = recievedMap.end() || stoi(message_id) > cur_max){
+            recievedIter = recievedMap.find(stoi(sender_id));
+            if(recievedIter != recievedMap.end()){
+                printf("Stopped Message ID%d\n", stoi(message_id));
+            }
+            //Check if this message has been received before, don't process if vehicle/message id pair exists
+            if(recievedIter == recievedMap.end() || stoi(message_id) > recievedIter -> second){
+
+                recievedMap[stoi(sender_id)] = stoi(message_id);
                 // no outside opinion!
                 if(outsideIter == outOpinionMap.end()){
                     dist_mean = (currentTrust.dataBelief+currentTrust.dataPlausibility)/2;
@@ -137,6 +142,8 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
                 //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
                 printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
+            }else{
+                printf("Message repeated\n");
             }
 
             //iter = reports.find(road_id);
