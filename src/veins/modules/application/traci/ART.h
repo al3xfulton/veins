@@ -65,6 +65,7 @@ class ART : public BaseWaveApplLayer {
 		virtual void initialize(int stage);
 
 	protected:
+		int messageCount;
 		simtime_t lastDroveAt;
 		bool sentMessage;
 		bool sentFakeMessage;

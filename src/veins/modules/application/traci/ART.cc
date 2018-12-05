@@ -42,6 +42,7 @@ void ART::initialize(int stage) {
         delimiter2 = "::";
         timeFromMessage = 0;
         accidentMessageCount = 0;
+        messageCount = 0;
 
         updateTime = 40;
         trustUpdateTime = 20;
@@ -137,6 +138,7 @@ void ART::onWSM(WaveShortMessage* wsm) {
                     wsm->setSenderAddress(myId);
                     wsm->setSerial(3);
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                    messageCount += 1;
                 }
 
 
@@ -146,41 +148,6 @@ void ART::onWSM(WaveShortMessage* wsm) {
                 printf("Message repeated\n");
             }
 
-            //iter = reports.find(road_id);
-
-            /* Rachel: I think all of this is for opportunistic "polling" so I'm commenting it out
-             if (iter != reports.end()){ // Road ID already in map
-                //printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
-
-                // Received old message; don't reroute
-                if (std::stoi(time_sent) - std::stoi(iter->second.second) > 300) {
-                    //printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
-                    iter->second = std::make_pair(sender_id, time_sent);
-                    // Echo
-                    //repeat the received traffic update once in 2 seconds plus some random delay
-                    wsm->setSenderAddress(myId);
-                    wsm->setSerial(3);
-                    scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
-                    // Don't reroute
-                }
-
-                // Received verification message
-                else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
-                    //printf("Vehicle %d verified Accident on: %s\n", myId, road_id.c_str());
-
-                    iter->second = std::make_pair(sender_id, time_sent);
-                    traciVehicle->changeRoute(road_id, 9999);
-                    // Send echo
-                    //repeat the received traffic update once in 2 seconds plus some random delay
-                    wsm->setSenderAddress(myId);
-                    wsm->setSerial(3);
-                    scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
-                }
-                else { // An echo of a recent message or a repeat from the original sender
-                    //printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
-                    // Don't echo, react, or update map
-                }
-                */
             }
             else { // put new thing in map
                 reports[road_id] = std::make_pair(sender_id, time_sent);
@@ -189,6 +156,7 @@ void ART::onWSM(WaveShortMessage* wsm) {
                 wsm->setSenderAddress(myId);
                 wsm->setSerial(3);
                 scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                messageCount += 1;
             }
 
         //}
@@ -251,6 +219,7 @@ void ART::handleSelfMsg(cMessage* msg) {
         }
         else {
             scheduleAt(simTime()+1, wsm);
+            messageCount += 1;
         }
     }
     else {
@@ -275,6 +244,7 @@ void ART::handlePositionUpdate(cObject* obj) {
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+            messageCount =+ 1;
         }
         else {
             //send right away on CCH, because channel switching is disabled
@@ -300,6 +270,7 @@ void ART::handlePositionUpdate(cObject* obj) {
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+            messageCount += 1;
         }
         else {
             //send right away on CCH, because channel switching is disabled
@@ -379,6 +350,7 @@ void ART::handlePositionUpdate(cObject* obj) {
                     startService(Channels::SCH2, 42, "Traffic Information Service");
                     //started service and server advertising, schedule message to self to send later
                     scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+                    messageCount += 1;
                 }
                 else {
                     //send right away on CCH, because channel switching is disabled
@@ -410,6 +382,7 @@ void ART::handlePositionUpdate(cObject* obj) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later
                 scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
+                messageCount += 1;
             }
             else {
                 //send right away on CCH, because channel switching is disabled
