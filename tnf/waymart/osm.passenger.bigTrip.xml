@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- generated on 2018-10-17 15:15:13.285654 by $Id$ via randomTrips.py
+  options: 
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vType id="passenger" speedFactor="normc(1.00,0.10,0.20,2.00)" vClass="passenger">
+    </vType>
+
+    <trip id="veh0" depart="0.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh1" depart="8.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh2" depart="13.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh3" depart="18.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh4" depart="23.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+	<trip id="veh5" depart="26.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh6" depart="29.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh7" depart="32.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh8" depart="35.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh9" depart="38.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+	<trip id="veh10" depart="40.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh11" depart="42.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh12" depart="44.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh13" depart="46.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+    <trip id="veh14" depart="48.00" departLane="best" from="-10887764#1" to="10886775#4" type="passenger"/>
+
+</routes>
