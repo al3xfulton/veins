@@ -46,6 +46,7 @@ class Verification : public BaseWaveApplLayer {
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
+		int messageCount;
 
 		std::string infoWeather;
 		std::string alertAccident;
