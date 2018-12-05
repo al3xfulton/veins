@@ -21,8 +21,8 @@
 package org.car2x.veins.modules.application.traci;
 import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
 
-simple ART extends BaseWaveApplLayer
+simple Baseline extends BaseWaveApplLayer
 {
-    @class(ART);
+    @class(Baseline);
     @display("i=block/app2");
 }
