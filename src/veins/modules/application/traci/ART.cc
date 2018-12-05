@@ -87,11 +87,11 @@ void ART::onWSM(WaveShortMessage* wsm) {
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
         std::string message_id = data_nonce.substr(data_nonce.find(delimiter2) + 2, data_nonce.length() - (dataField4.length()-2));
 
-        printf("This is an accident %s %s %s\n", road_id.c_str(), time_sent.c_str(), message_id.c_str());
+        //printf("This is an accident %s %s %s\n", road_id.c_str(), time_sent.c_str(), message_id.c_str());
         // Check if you can verify the new message; I'm assuming you can't ever verify an accident message
         // If you can, verify whether it is true
         updateMatrix(std::stoi(sender_id), false, false); // Assumes we can't verify accident message
-        printf("From %d: %s reports accident on %s at time %s \n", myId, sender_id.c_str(), road_id.c_str(), time_sent.c_str());
+        //printf("From %d: %s reports accident on %s at time %s \n", myId, sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
         if (mobility->getRoadId()[0] != ':'){
             float dist_mean;
@@ -106,7 +106,7 @@ void ART::onWSM(WaveShortMessage* wsm) {
 
             recievedIter = recievedMap.find(stoi(sender_id));
             if(recievedIter != recievedMap.end()){
-                printf("Stopped Message ID%d\n", stoi(message_id));
+                //printf("Stopped Message ID%d\n", stoi(message_id));
             }
             //Check if this message has been received before, don't process if vehicle/message id pair exists
             if(recievedIter == recievedMap.end() || stoi(message_id) > recievedIter -> second){
@@ -144,9 +144,9 @@ void ART::onWSM(WaveShortMessage* wsm) {
 
 
                 //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
-                printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
+                //printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
             }else{
-                printf("Message repeated\n");
+                //printf("Message repeated\n");
             }
 
             }
