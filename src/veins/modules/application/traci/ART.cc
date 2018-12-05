@@ -139,6 +139,7 @@ void ART::onWSM(WaveShortMessage* wsm) {
                     wsm->setSerial(3);
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                     messageCount += 1;
+                    printf("Node Id: %d Count: %d\n", myId, messageCount);
                 }
 
 
@@ -157,6 +158,7 @@ void ART::onWSM(WaveShortMessage* wsm) {
                 wsm->setSerial(3);
                 scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                 messageCount += 1;
+                printf("Node Id: %d Count: %d\n", myId, messageCount);
             }
 
         //}
@@ -220,6 +222,7 @@ void ART::handleSelfMsg(cMessage* msg) {
         else {
             scheduleAt(simTime()+1, wsm);
             messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
         }
     }
     else {
@@ -244,7 +247,8 @@ void ART::handlePositionUpdate(cObject* obj) {
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
-            messageCount =+ 1;
+            messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
         }
         else {
             //send right away on CCH, because channel switching is disabled
@@ -271,6 +275,7 @@ void ART::handlePositionUpdate(cObject* obj) {
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
             messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
         }
         else {
             //send right away on CCH, because channel switching is disabled
@@ -351,6 +356,7 @@ void ART::handlePositionUpdate(cObject* obj) {
                     //started service and server advertising, schedule message to self to send later
                     scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
                     messageCount += 1;
+                    printf("Node Id: %d Count: %d\n", myId, messageCount);
                 }
                 else {
                     //send right away on CCH, because channel switching is disabled
@@ -383,6 +389,7 @@ void ART::handlePositionUpdate(cObject* obj) {
                 //started service and server advertising, schedule message to self to send later
                 scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
                 messageCount += 1;
+                printf("Node Id: %d Count: %d\n", myId, messageCount);
             }
             else {
                 //send right away on CCH, because channel switching is disabled
