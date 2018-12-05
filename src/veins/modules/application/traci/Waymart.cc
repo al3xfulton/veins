@@ -42,6 +42,7 @@ void Waymart::initialize(int stage) {
         delimiter2 = "::";
         timeFromMessage = 0;
         accidentMessageCount = 0;
+        recievedMap
 
         updateTime = 40;
         trustUpdateTime = 20;
@@ -103,38 +104,40 @@ void Waymart::onWSM(WaveShortMessage* wsm) {
 
             outsideIter = outOpinionMap.find(std::stoi(sender_id));
 
-            // no outside opinion!
-            if(outsideIter == outOpinionMap.end()){
-                 dist_mean = (currentTrust.dataBelief+currentTrust.dataPlausibility)/2;
-                 sigma = (currentTrust.dataPlausibility-currentTrust.dataBelief)/6; // this is somewhat arbitrary
-                 sample = getSample(dist_mean, sigma);
+            int cur_max = recievedMap.find(sender_id); //Check if this message has been recieved before, don't process if vehicle/message id pair exists
+            if(cur_max = recievedMap.end() || stoi(message_id) > cur_max){
+                // no outside opinion!
+                if(outsideIter == outOpinionMap.end()){
+                    dist_mean = (currentTrust.dataBelief+currentTrust.dataPlausibility)/2;
+                    sigma = (currentTrust.dataPlausibility-currentTrust.dataBelief)/6; // this is somewhat arbitrary
+                    sample = getSample(dist_mean, sigma);
+                }
+                // we do have a number of outside opinions
+                else {
+                    OutsideOpinion outsideOpinion = outOpinionMap[std::stoi(sender_id)];
+                    float total_belief = (currentTrust.dataBelief+outsideOpinion.outBelief*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
+                    float total_plaus = (currentTrust.dataPlausibility + outsideOpinion.outPlaus*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
+                    dist_mean = (total_belief + total_plaus)/2;
+                    sigma = (total_plaus-total_belief)/6;
+                    sample = getSample(dist_mean, sigma);
+                }
+
+                if (sample > rerouteThreshold){
+                    traciVehicle->changeRoute(road_id, 9999);
+                }
+
+                if (std::stoi(time_sent) >= simTime().dbl()-1){
+                    // Send echo
+                    //repeat the received traffic update once in 2 seconds plus some random delay
+                    wsm->setSenderAddress(myId);
+                    wsm->setSerial(3);
+                    scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+                }
+
+
+                //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
+                printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
             }
-            // we do have a number of outside opinions
-            else {
-                OutsideOpinion outsideOpinion = outOpinionMap[std::stoi(sender_id)];
-                float total_belief = (currentTrust.dataBelief+outsideOpinion.outBelief*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
-                float total_plaus = (currentTrust.dataPlausibility + outsideOpinion.outPlaus*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
-                dist_mean = (total_belief + total_plaus)/2;
-                sigma = (total_plaus-total_belief)/6;
-                sample = getSample(dist_mean, sigma);
-            }
-
-            if (sample > rerouteThreshold){
-                traciVehicle->changeRoute(road_id, 9999);
-            }
-
-            if (std::stoi(time_sent) >= simTime().dbl()-1){
-                // Send echo
-                //repeat the received traffic update once in 2 seconds plus some random delay
-                wsm->setSenderAddress(myId);
-                wsm->setSerial(3);
-                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
-            }
-
-
-            //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
-            printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
-
 
             //iter = reports.find(road_id);
 
