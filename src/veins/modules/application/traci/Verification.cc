@@ -88,7 +88,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                     wsm->setSerial(3);
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                     messageCount += 1;
-                    printf("Node Id: %d Count: %d\n", myId, messageCount);
+                    printf("Replace Old Node Id: %d Count: %d\n", myId, messageCount);
                     // Don't reroute
                 }
                 else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
@@ -96,14 +96,14 @@ void Verification::onWSM(WaveShortMessage* wsm) {
 
                     iter->second = std::make_pair(sender_id, time_sent);
                     traciVehicle->changeRoute(road_id, 9999);
-                    printf("ID %d reroute \n", myId);
+                    //printf("ID %d reroute \n", myId);
                     // Send echo
                     //repeat the received traffic update once in 2 seconds plus some random delay
                     wsm->setSenderAddress(myId);
                     wsm->setSerial(3);
                     scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                     messageCount += 1;
-                    printf("Node Id: %d Count: %d\n", myId, messageCount);
+                    printf("Reroute Node Id: %d Count: %d\n", myId, messageCount);
                 }
                 else { // An echo of a recent message or a repeat from the original sender
                     //printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
@@ -118,7 +118,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                 wsm->setSerial(3);
                 scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
                 messageCount += 1;
-                printf("Node Id: %d Count: %d\n", myId, messageCount);
+                printf("New Node Node Id: %d Count: %d\n", myId, messageCount);
             }
 
         }
