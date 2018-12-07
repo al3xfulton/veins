@@ -45,6 +45,7 @@ class Baseline : public BaseWaveApplLayer {
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
+		int messageCount;
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
         virtual void onWSA(WaveServiceAdvertisment* wsa);

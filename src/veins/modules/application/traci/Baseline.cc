@@ -48,6 +48,8 @@ void Baseline::onWSM(WaveShortMessage* wsm) {
     if (mobility->getRoadId()[0] != ':' && wsm->getSenderAddress() != myId) traciVehicle->changeRoute(wsm->getWsmData(), 9999);
     printf("ID %d reroute \n", myId);
     if (!sentMessage) {
+        messageCount += 1;
+        printf("Node Id: %d Count: %d\n", myId, messageCount);
         sentMessage = true;
         //repeat the received traffic update once in 2 seconds plus some random delay
         wsm->setSenderAddress(myId);
@@ -88,6 +90,8 @@ void Baseline::handlePositionUpdate(cObject* obj) {
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
             wsm->setWsmData(mobility->getRoadId().c_str());
+            messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
 
             //host is standing still due to crash
             if (dataOnSch) {
@@ -113,6 +117,8 @@ void Baseline::handlePositionUpdate(cObject* obj) {
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
             wsm->setWsmData(mobility->getSavedRoadId().c_str());
+            messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
 
             // I have no idea what this means
             if (dataOnSch) {
