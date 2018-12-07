@@ -426,9 +426,9 @@ void ART::addEntry(int nodeId, bool checkable, bool verified){
     Trust temp;
     //temp.dataTrust = (float)((rand()%20)+80)/100;
 
-    temp.numMessages = 5;
-    temp.numTrue = 1;
-    temp.numFalse = 2;
+    //temp.numMessages = 5;
+    //temp.numTrue = 1;
+    //temp.numFalse = 2;
 
     // To be used if we implement a different mode of "hand waving" initialization
     /*
@@ -450,8 +450,11 @@ void ART::addEntry(int nodeId, bool checkable, bool verified){
     }
     */
 
-    temp.dataBelief = temp.numTrue/temp.numMessages;
-    temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
+    //temp.dataBelief = temp.numTrue/temp.numMessages;
+    //temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
+    temp.dataBelief = (float)((rand() % 20) + 10)/100;
+    temp.dataPlausibility = (float)((rand % 10) + 90)/100;
+    printf("%f %f\n", temp.dataBelief, temp.dataPlausibility);
     trustMap[nodeId] = temp;
 }
 
