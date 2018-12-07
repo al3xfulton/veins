@@ -48,6 +48,9 @@ void Baseline::onWSM(WaveShortMessage* wsm) {
 
     if (mobility->getRoadId()[0] != ':' && wsm->getSenderAddress() != myId) traciVehicle->changeRoute(wsm->getWsmData(), 9999);
     printf("ID %d reroute \n", myId);
+    if (myId == 31) {
+        printf("Reroute on report from %d \n", wsm->getSenderAddress());
+    }
     if (!sentMessage) {
         messageCount += 1;
         printf("Node Id: %d Count: %d\n", myId, messageCount);

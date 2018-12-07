@@ -234,7 +234,7 @@ void ART::handleSelfMsg(cMessage* msg) {
 
 void ART::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
-    if (timeFromTrustUpdate % 60 == trustUpdateTime) {
+    if (timeFromTrustUpdate % 60 == trustUpdateTime) { // Used to be mod 60
         timeFromTrustUpdate = trustUpdateTime + 1;
 
         //Just to make sure that data is being pulled correctly
@@ -453,7 +453,7 @@ void ART::addEntry(int nodeId, bool checkable, bool verified){
     //temp.dataBelief = temp.numTrue/temp.numMessages;
     //temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
     temp.dataBelief = (float)((rand() % 20) + 10)/100;
-    temp.dataPlausibility = (float)((rand % 10) + 90)/100;
+    temp.dataPlausibility = (float)((rand() % 10) + 90)/100;
     printf("%f %f\n", temp.dataBelief, temp.dataPlausibility);
     trustMap[nodeId] = temp;
 }

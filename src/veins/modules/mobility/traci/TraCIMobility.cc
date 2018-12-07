@@ -125,7 +125,7 @@ void TraCIMobility::initialize(int stage)
 			simtime_t fakeAccidentStart = par("fakeAccidentStart");
 			startFakeAccidentMsg = new cMessage("scheduledFakeAccident");
 			stopFakeAccidentMsg = new cMessage("scheduledFakeAccidentResolved");
-			fake_accident_location = "10886775#2";
+			fake_accident_location = "-10885963#5";
 			scheduleAt(simTime() + fakeAccidentStart, startFakeAccidentMsg);
 		}
 	}
