@@ -28,6 +28,7 @@ void Baseline::initialize(int stage) {
         sentFakeMessage = false;
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
+        messageCount = 0;
     }
 }
 
