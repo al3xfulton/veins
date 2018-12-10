@@ -114,6 +114,9 @@ class ART : public BaseWaveApplLayer {
 		std::map<std::string, std::pair<std::string, std::string>> reports;
 		std::map<std::string, std::pair<std::string, std::string>>::iterator iter;
 
+		bool attackStarted;
+		std::string attackPosition;
+
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
         virtual void onWSA(WaveServiceAdvertisment* wsa);

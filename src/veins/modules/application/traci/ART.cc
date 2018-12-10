@@ -43,6 +43,8 @@ void ART::initialize(int stage) {
         timeFromMessage = 0;
         accidentMessageCount = 0;
         messageCount = 0;
+        attackStarted = false;
+        attackPosition = "";
 
         updateTime = 40;
         trustUpdateTime = 20;
@@ -93,11 +95,13 @@ void ART::onWSM(WaveShortMessage* wsm) {
         updateMatrix(std::stoi(sender_id), false, false); // Assumes we can't verify accident message
         //printf("From %d: %s reports accident on %s at time %s \n", myId, sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
-        if (mobility->getRoadId()[0] != ':'){
+        if (mobility->getRoadId()[0] != ':'){// && (!attackStarted || attackPosition != road_id)){
             float dist_mean;
             float sigma;
             double sample;
             double rerouteThreshold = 0.45;
+
+            printf("Considering node %d \n", myId);
 
             // we just added it so don't need to check if it's present
             Trust currentTrust = trustMap[std::stoi(sender_id)];
@@ -375,11 +379,13 @@ void ART::handlePositionUpdate(cObject* obj) {
         // no crash - check for trigger for fake crash
         //printf("%d about to send accident message \n", myId);
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
-            //printf("%d prepping accident message \n", myId);
+            printf("%d prepping accident message \n", myId);
 
             findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
             sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
             sentFakeMessage = true;
+            attackStarted = true;
+            attackPosition = mobility->getSavedRoadId();
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
@@ -454,7 +460,7 @@ void ART::addEntry(int nodeId, bool checkable, bool verified){
     //temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
     temp.dataBelief = (float)((rand() % 20) + 10)/100;
     temp.dataPlausibility = (float)((rand() % 10) + 90)/100;
-    printf("%f %f\n", temp.dataBelief, temp.dataPlausibility);
+    printf("%f %f", temp.dataBelief, temp.dataPlausibility);
     trustMap[nodeId] = temp;
 }
 

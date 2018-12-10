@@ -46,6 +46,10 @@ class Baseline : public BaseWaveApplLayer {
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
 		int messageCount;
+
+		bool attackStarted;
+		std::string attackPosition;
+
 	protected:
         virtual void onWSM(WaveShortMessage* wsm);
         virtual void onWSA(WaveServiceAdvertisment* wsa);

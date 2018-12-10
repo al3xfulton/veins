@@ -38,6 +38,8 @@ void Verification::initialize(int stage) {
         delimiter2 = "::";
         timeFromMessage = 0;
         messageCount = 0;
+        attackStarted = false;
+        attackPosition = "";
     }
 }
 
@@ -73,7 +75,7 @@ void Verification::onWSM(WaveShortMessage* wsm) {
 
         //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
 
-        if (mobility->getRoadId()[0] != ':'){
+        if (mobility->getRoadId()[0] != ':' && (!attackStarted || attackPosition != road_id)){
             iter = reports.find(road_id);
 
             if (iter != reports.end()){ // Road ID already in map
@@ -241,6 +243,9 @@ void Verification::handlePositionUpdate(cObject* obj) {
             findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
             sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
             sentFakeMessage = true;
+
+            attackStarted = true;
+            attackPosition = mobility->getSavedRoadId();
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);

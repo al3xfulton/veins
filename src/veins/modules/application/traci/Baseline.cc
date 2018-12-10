@@ -29,6 +29,9 @@ void Baseline::initialize(int stage) {
         lastDroveAt = simTime();
         currentSubscribedServiceId = -1;
         messageCount = 0;
+
+        attackStarted = false;
+        attackPosition = "";
     }
 }
 
@@ -46,20 +49,23 @@ void Baseline::onWSA(WaveServiceAdvertisment* wsa) {
 void Baseline::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
-    if (mobility->getRoadId()[0] != ':' && wsm->getSenderAddress() != myId) traciVehicle->changeRoute(wsm->getWsmData(), 9999);
-    printf("ID %d reroute \n", myId);
-    if (myId == 31) {
-        printf("Reroute on report from %d \n", wsm->getSenderAddress());
+    if (mobility->getRoadId()[0] != ':' && wsm->getSenderAddress() != myId) {
+        if (!attackStarted || attackPosition != wsm->getWsmData()){
+            traciVehicle->changeRoute(wsm->getWsmData(), 9999);
+            printf("ID %d reroute \n", myId);
+
+            if (!sentMessage) {
+                messageCount += 1;
+                printf("Node Id: %d Count: %d\n", myId, messageCount);
+                sentMessage = true;
+                //repeat the received traffic update once in 2 seconds plus some random delay
+                wsm->setSenderAddress(myId);
+                wsm->setSerial(3);
+                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+            }
+        }
     }
-    if (!sentMessage) {
-        messageCount += 1;
-        printf("Node Id: %d Count: %d\n", myId, messageCount);
-        sentMessage = true;
-        //repeat the received traffic update once in 2 seconds plus some random delay
-        wsm->setSenderAddress(myId);
-        wsm->setSerial(3);
-        scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
-    }
+
 }
 
 void Baseline::handleSelfMsg(cMessage* msg) {
@@ -117,6 +123,8 @@ void Baseline::handlePositionUpdate(cObject* obj) {
             //findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
             //sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
             sentFakeMessage = true;
+            attackStarted = true;
+            attackPosition = mobility->getSavedRoadId();
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
