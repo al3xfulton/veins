@@ -17,6 +17,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
+// Edited by Rachel Eaton, Alex Fulton, Jamie Thorpe
+//
 
 #include "veins/modules/application/traci/Verification.h"
 
@@ -57,10 +59,13 @@ void Verification::onWSA(WaveServiceAdvertisment* wsa) {
 void Verification::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
+    // WSM's now contain longer strings in the Data section to be parsed
+    // Parsing is different based on the contents of getPsc()
     std::string thisPSC = wsm->getPsc();
     std::string psc_cat = thisPSC.substr(0, thisPSC.find(delimiter2));
     std::string psc_type = thisPSC.substr(thisPSC.find(delimiter2) + 2, thisPSC.length() - psc_cat.length() - 2);
 
+    // Accident Alert message
     if(psc_cat == "Alert" && psc_type == "Accident") {
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
@@ -73,17 +78,16 @@ void Verification::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
 
-        //printf("%s reports accident on %s at %s \n", sender_id.c_str(), road_id.c_str(), time_sent.c_str());
-
+        // Make sure the simulation is still going and that we are not the attacker hearing our own attack
         if (mobility->getRoadId()[0] != ':' && (!attackStarted || attackPosition != road_id)){
             iter = reports.find(road_id);
 
-            if (iter != reports.end()){ // Road ID already in map
-                //printf("Vehicle %d receives report of %s Accident on: %s\n", myId, sender_id.c_str(), road_id.c_str());
+            // Report already in map
+            if (iter != reports.end()){
 
                 if (std::stoi(time_sent) - std::stoi(iter->second.second) > 300) {
-                    //printf("Vehicle %d replaces very old info: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
                     iter->second = std::make_pair(sender_id, time_sent);
+
                     // Echo
                     //repeat the received traffic update once in 2 seconds plus some random delay
                     wsm->setSenderAddress(myId);
@@ -93,8 +97,8 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                     printf("Replace Old Node Id: %d Count: %d\n", myId, messageCount);
                     // Don't reroute
                 }
-                else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) { // we know it's a verification from a different sender
-                    //printf("Vehicle %d verified Accident on: %s\n", myId, road_id.c_str());
+                // Successful verification message
+                else if (std::stoi(time_sent) >= std::stoi(iter->second.second) && iter->second.first != sender_id) {
 
                     iter->second = std::make_pair(sender_id, time_sent);
                     traciVehicle->changeRoute(road_id, 9999);
@@ -107,14 +111,15 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                     messageCount += 1;
                     printf("Reroute Node Id: %d Count: %d\n", myId, messageCount);
                 }
-                else { // An echo of a recent message or a repeat from the original sender
-                    //printf("Vehicle %d received a repeat or old information: accident %s at %s \n", myId, road_id.c_str(), time_sent.c_str());
-                    // Don't echo, react, or update map
-                }
+
+                // Otherwise, an echo of a recent message or a repeat from the original sender
+
             }
-            else { // put new thing in map
+            // Report not already in map
+            else {
                 reports[road_id] = std::make_pair(sender_id, time_sent);
-                // Send echo
+
+                // Echo
                 //repeat the received traffic update once in 2 seconds plus some random delay
                 wsm->setSenderAddress(myId);
                 wsm->setSerial(3);
@@ -122,12 +127,11 @@ void Verification::onWSM(WaveShortMessage* wsm) {
                 messageCount += 1;
                 printf("New Node Node Id: %d Count: %d\n", myId, messageCount);
             }
-
         }
-
     }
-    else if (psc_cat == "Info" && psc_type == "Weather") { // can check here for benign Info updates
-        //printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
+
+    // Basic Information Message
+    else if (psc_cat == "Info" && psc_type == "Weather") {
 
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
@@ -140,11 +144,9 @@ void Verification::onWSM(WaveShortMessage* wsm) {
         std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
         std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
 
-        //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
+        // Message not currently utilized by Third Party Verification
     }
-    else {
-        //printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
-    }
+
 }
 
 void Verification::handleSelfMsg(cMessage* msg) {
@@ -170,6 +172,8 @@ void Verification::handleSelfMsg(cMessage* msg) {
 void Verification::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
 
+    // Send Weather message every 10 minutes
+    // Not utilized by current simulations
     if (timeFromMessage >= 600) {
         timeFromMessage = 0;
 
@@ -179,7 +183,6 @@ void Verification::handlePositionUpdate(cObject* obj) {
         std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + ("rain");
         wsm->setWsmData(filler.c_str());
 
-        //host is standing still due to crash
         if (dataOnSch) {
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
@@ -196,20 +199,14 @@ void Verification::handlePositionUpdate(cObject* obj) {
 
     // stopped for for at least 10s? Indicating a crash
     if (mobility->getSpeed() < 1) {
-        if (myId == 13 || myId == 7) {
-            //printf("%d is at a stand still \n", myId);
-        }
 
         if (simTime() - lastDroveAt >= 10) {
-            if (myId == 13 || myId == 7) {
-                //printf("%d hasn't moved in a while; SM is %d \n", myId, sentMessage);
-            }
 
             if (sentMessage == false) {
-                //printf("%d prepping accident message \n", myId);
                 findHost()->getDisplayString().updateWith("r=16,red");
                 sentMessage = true;
 
+                // Note that WSM data has new format
                 WaveShortMessage* wsm = new WaveShortMessage();
                 populateWSM(wsm);
                 wsm->setPsc(alertAccident.c_str());
@@ -233,20 +230,20 @@ void Verification::handlePositionUpdate(cObject* obj) {
 
 
     }
+    // Fake Accident attack
     else {
         lastDroveAt = simTime();
         // no crash - check for trigger for fake crash
-        //printf("%d about to send accident message \n", myId);
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
-            //printf("%d prepping accident message \n", myId);
 
-            findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
-            sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
+            findHost()->getDisplayString().updateWith("r=16,blue");
+            sentMessage = true;
             sentFakeMessage = true;
 
             attackStarted = true;
             attackPosition = mobility->getSavedRoadId();
 
+            // Generate message containing stored road ID for attack, as opposed to current ID
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
             wsm->setPsc(alertAccident.c_str());
@@ -254,7 +251,7 @@ void Verification::handlePositionUpdate(cObject* obj) {
             wsm->setWsmData(filler.c_str());
             messageCount += 1;
             printf("Node Id: %d Count: %d\n", myId, messageCount);
-            // I have no idea what this means
+
             if (dataOnSch) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later

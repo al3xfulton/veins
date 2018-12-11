@@ -34,7 +34,8 @@
  *
  * @author Christoph Sommer : initial DemoApp
  * @author David Eckhoff : rewriting, moving functionality to BaseWaveApplLayer, adding WSA
- *
+ * @author Rachel Eaton, Alex Fulton, Jamie Thorpe : adding functionality to count total
+ *             outgoing messages and handle false information attacks
  */
 
 class Baseline : public BaseWaveApplLayer {
@@ -45,8 +46,11 @@ class Baseline : public BaseWaveApplLayer {
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
+
+		// Count total outgoing messages
 		int messageCount;
 
+		// So a car knows it has initiated an attack
 		bool attackStarted;
 		std::string attackPosition;
 

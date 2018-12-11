@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!-- debug config -->
+<!-- Choose title of desired trip file to use (line 7) -->
 <launch>
 	<copy file="osm.net.xml" />
 	<copy file="osm.passenger.rou.xml" />

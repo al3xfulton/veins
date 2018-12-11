@@ -37,9 +37,12 @@
  *
  * @author Christoph Sommer : initial DemoApp
  * @author David Eckhoff : rewriting, moving functionality to BaseWaveApplLayer, adding WSA
+ * @author Rachel Eaton, Alex Fulton, Jamie Thorpe : adding functionality for implementing ART,
+ *             sending more data in WSM's, sending basic info messages
  *
  */
 
+// Internal opinion about a particular vehicle (ART)
 struct Trust {
 	float dataPlausibility;
 	float dataBelief;
@@ -48,12 +51,14 @@ struct Trust {
 	float numFalse;
 };
 
+// External opinion about a particular vehicle (ART)
 struct OutsideOpinion {
     float outBelief;
     float outPlaus;
     int contributors;
 };
 
+// Entries of external opinion that need to be processed (ART)
 struct Backlog {
     int subjectId;
     float foreignBelief;
@@ -65,12 +70,16 @@ class ART : public BaseWaveApplLayer {
 		virtual void initialize(int stage);
 
 	protected:
-		int messageCount;
 		simtime_t lastDroveAt;
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
 
+		// Track the number of outgoing messages
+		int messageCount;
+
+		// Formatting all incoming message types
+		// Includes basic info, accident alerts, and opinion stuctures for ART
 		std::string infoWeather;
 		std::string infoTrust;
 		std::string alertAccident;
@@ -81,19 +90,16 @@ class ART : public BaseWaveApplLayer {
 		std::string delimiter1;
 		std::string delimiter2;
 
-		//Track whether accident messages have been recieved yet
+		//Track whether accident messages have been received yet
 		int accidentMessageCount;
 		std::map<int, int> recievedMap;
 		std::map<int, int>::iterator recievedIter;
-
-		// For scheduling at random offsets
-		//std::uniform_int_distribution<int> unif(0, 59);
 
 		// Selection of trustworthiness from normal distribution
 		std::default_random_engine generator;
 
 
-		// For internal opinions about each vehicle (and external?)
+		// For internal opinions about each vehicle
 		std::map<int, Trust> trustMap;
 		std::map<int, Trust>::iterator trustIter;
 		int trustUpdateTime;
@@ -109,11 +115,12 @@ class ART : public BaseWaveApplLayer {
         int timeFromUpdate;
         std::queue<Backlog> toProcess;
 
-		// For tracking Accident messages (used for Simple Verification)
+		// For tracking what has been echoed already, so echo doesn't continue indefinitely
 		int timeFromMessage;
 		std::map<std::string, std::pair<std::string, std::string>> reports;
 		std::map<std::string, std::pair<std::string, std::string>>::iterator iter;
 
+        // So attacker knows an attack has started
 		bool attackStarted;
 		std::string attackPosition;
 
@@ -124,6 +131,7 @@ class ART : public BaseWaveApplLayer {
         virtual void handleSelfMsg(cMessage* msg);
 		virtual void handlePositionUpdate(cObject* obj);
 
+		// ART-related functions below
 		virtual void updateMatrix(int nodeId, bool checkable, bool verified);
 		virtual void addEntry(int nodeId, bool checkable, bool verified);
 		virtual void modifyEntry(int nodeId, bool checkable, bool verified);

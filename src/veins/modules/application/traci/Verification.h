@@ -35,6 +35,9 @@
  *
  * @author Christoph Sommer : initial DemoApp
  * @author David Eckhoff : rewriting, moving functionality to BaseWaveApplLayer, adding WSA
+ * @author Rachel Eaton, Alex Fulton, Jamie Thorpe : adding count of all outgoing messages,
+ *             functionality for basic info and more robust alert messages, map of reports,
+ *             support false info attack, support Third Party Verification of accidents
  *
  */
 
@@ -46,8 +49,12 @@ class Verification : public BaseWaveApplLayer {
 		bool sentMessage;
 		bool sentFakeMessage;
 		int currentSubscribedServiceId;
+
+		// Count outgoing messages
 		int messageCount;
 
+		// For formatting WSM's with more data
+		// Both basic info and accident alerts
 		std::string infoWeather;
 		std::string alertAccident;
 		std::string dataField1;
@@ -56,10 +63,12 @@ class Verification : public BaseWaveApplLayer {
 		std::string delimiter1;
 		std::string delimiter2;
 
+		// Map and track recent accident reports in order to verify
 		int timeFromMessage;
 		std::map<std::string, std::pair<std::string, std::string>> reports;
 		std::map<std::string, std::pair<std::string, std::string>>::iterator iter;
 
+		// So attacker knows they have initiated an attack
 		bool attackStarted;
         std::string attackPosition;
 

@@ -16,6 +16,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
+// Edited by Rachel Eaton, Alex Fulton, Jamie Thorpe
+//
 
 #include "veins/modules/application/traci/Baseline.h"
 
@@ -50,6 +52,8 @@ void Baseline::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
     if (mobility->getRoadId()[0] != ':' && wsm->getSenderAddress() != myId) {
+
+        // Make sure you are not an attacker reacting to your own fake accident
         if (!attackStarted || attackPosition != wsm->getWsmData()){
             traciVehicle->changeRoute(wsm->getWsmData(), 9999);
             printf("ID %d reroute \n", myId);
@@ -58,6 +62,7 @@ void Baseline::onWSM(WaveShortMessage* wsm) {
                 messageCount += 1;
                 printf("Node Id: %d Count: %d\n", myId, messageCount);
                 sentMessage = true;
+
                 //repeat the received traffic update once in 2 seconds plus some random delay
                 wsm->setSenderAddress(myId);
                 wsm->setSerial(3);
@@ -120,11 +125,13 @@ void Baseline::handlePositionUpdate(cObject* obj) {
         // no crash - check for trigger for fake crash
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
 
-            //findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
-            //sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
+            // If attack triggered, generate and send accident message using
+            // stored road ID (as opposed to current roud ID)
+            findHost()->getDisplayString().updateWith("r=16,blue");
             sentFakeMessage = true;
             attackStarted = true;
             attackPosition = mobility->getSavedRoadId();
+            printf("%d generating accident \n", myId);
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
@@ -132,7 +139,6 @@ void Baseline::handlePositionUpdate(cObject* obj) {
             messageCount += 1;
             printf("Node Id: %d Count: %d\n", myId, messageCount);
 
-            // I have no idea what this means
             if (dataOnSch) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later

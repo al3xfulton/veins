@@ -17,6 +17,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
+// Edited by Rachel Eaton, Alex Fulton, Jamie Thorpe
 
 #include "veins/modules/application/traci/ART.h"
 #include <stdlib.h>
@@ -46,9 +47,11 @@ void ART::initialize(int stage) {
         attackStarted = false;
         attackPosition = "";
 
+        // UpdateTime and trustUpdateTime may be tuned
+        // UpdateTime: time offset from 1 min when vehicle processes stored external opinions
+        // TrustUpdateTime: time offset from 1 min when vehicle shared internal trust matrix
         updateTime = 40;
         trustUpdateTime = 20;
-        //printf("%d %d updateTime %d trustUpdateTime", myId, updateTime, trustUpdateTime);
         timeFromUpdate = 0;
         timeFromTrustUpdate = 0;
     }
@@ -69,10 +72,13 @@ void ART::onWSA(WaveServiceAdvertisment* wsa) {
 void ART::onWSM(WaveShortMessage* wsm) {
     findHost()->getDisplayString().updateWith("r=16,green");
 
+    // WSM data contains a range of information to be parsed
+    // Messages processed differently depending on contents of getPsc()
     std::string thisPSC = wsm->getPsc();
     std::string psc_cat = thisPSC.substr(0, thisPSC.find(delimiter2));
     std::string psc_type = thisPSC.substr(thisPSC.find(delimiter2) + 2, thisPSC.length() - psc_cat.length() - 2);
 
+    // Accident message
     if(psc_cat == "Alert" && psc_type == "Accident") {
         std::string thisData = wsm->getWsmData();
         std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
@@ -89,40 +95,37 @@ void ART::onWSM(WaveShortMessage* wsm) {
         std::string time_sent = data_time.substr(data_time.find(delimiter2) + 2, data_time.length()-(dataField3.length()-2));
         std::string message_id = data_nonce.substr(data_nonce.find(delimiter2) + 2, data_nonce.length() - (dataField4.length()-2));
 
-        //printf("This is an accident %s %s %s\n", road_id.c_str(), time_sent.c_str(), message_id.c_str());
-        // Check if you can verify the new message; I'm assuming you can't ever verify an accident message
-        // If you can, verify whether it is true
-        updateMatrix(std::stoi(sender_id), false, false); // Assumes we can't verify accident message
-        //printf("From %d: %s reports accident on %s at time %s \n", myId, sender_id.c_str(), road_id.c_str(), time_sent.c_str());
+        // This is where we would verify ourselves (using vehicle sensors) whether message is true, if possible
 
-        if (mobility->getRoadId()[0] != ':'){// && (!attackStarted || attackPosition != road_id)){
+        // Assume that accident messages can never be verified
+        updateMatrix(std::stoi(sender_id), false, false);
+
+        // Check that we aren't an attacker reacting to our own accident
+        if (mobility->getRoadId()[0] != ':' && (!attackStarted || attackPosition != road_id)){
             float dist_mean;
             float sigma;
             double sample;
-            double rerouteThreshold = 0.45;
+            double rerouteThreshold = 0.5;
 
-            printf("Considering node %d \n", myId);
-
-            // we just added it so don't need to check if it's present
+            // We just added it so don't need to check if it's present
             Trust currentTrust = trustMap[std::stoi(sender_id)];
-
             outsideIter = outOpinionMap.find(std::stoi(sender_id));
-
             recievedIter = recievedMap.find(stoi(sender_id));
-            if(recievedIter != recievedMap.end()){
-                //printf("Stopped Message ID%d\n", stoi(message_id));
-            }
+
             //Check if this message has been received before, don't process if vehicle/message id pair exists
             if(recievedIter == recievedMap.end() || stoi(message_id) > recievedIter -> second){
 
                 recievedMap[stoi(sender_id)] = stoi(message_id);
-                // no outside opinion!
+
+                // No outside opinion!
                 if(outsideIter == outOpinionMap.end()){
                     dist_mean = (currentTrust.dataBelief+currentTrust.dataPlausibility)/2;
-                    sigma = (currentTrust.dataPlausibility-currentTrust.dataBelief)/6; // this is somewhat arbitrary
+                    sigma = (currentTrust.dataPlausibility-currentTrust.dataBelief)/6; // this 6 is somewhat arbitrary
                     sample = getSample(dist_mean, sigma);
                 }
-                // we do have a number of outside opinions
+
+                // Outside opinion exists
+                // Currently takes simple average - may be tuned
                 else {
                     OutsideOpinion outsideOpinion = outOpinionMap[std::stoi(sender_id)];
                     float total_belief = (currentTrust.dataBelief+outsideOpinion.outBelief*outsideOpinion.contributors)/(outsideOpinion.contributors+1);
@@ -132,6 +135,8 @@ void ART::onWSM(WaveShortMessage* wsm) {
                     sample = getSample(dist_mean, sigma);
                 }
 
+                // Check randomly drawn sample
+                // Threshold may be tuned
                 if (sample > rerouteThreshold){
                     traciVehicle->changeRoute(road_id, 9999);
                     printf("ID %d reroute \n", myId);
@@ -147,32 +152,25 @@ void ART::onWSM(WaveShortMessage* wsm) {
                     printf("Node Id: %d Count: %d\n", myId, messageCount);
                 }
 
-
-                //printf("Generating normal distribution between %f and %f based on %f messages\n", currentTrust.dataBelief, currentTrust.dataPlausibility, currentTrust.numMessages);
-                //printf("%d Generated sample %f with %f mean and %f std. dev\n", myId, sample, dist_mean, sigma);
-            }else{
-                //printf("Message repeated\n");
             }
 
-            }
-            else { // put new thing in map
-                reports[road_id] = std::make_pair(sender_id, time_sent);
-                // Send echo
-                //repeat the received traffic update once in 2 seconds plus some random delay
-                wsm->setSenderAddress(myId);
-                wsm->setSerial(3);
-                scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
-                messageCount += 1;
-                printf("Node Id: %d Count: %d\n", myId, messageCount);
-            }
-
-        //}
+        }
+        else { // put new thing in map
+            reports[road_id] = std::make_pair(sender_id, time_sent);
+            // Send echo
+            //repeat the received traffic update once in 2 seconds plus some random delay
+            wsm->setSenderAddress(myId);
+            wsm->setSerial(3);
+            scheduleAt(simTime() + 2 + uniform(0.01,0.2), wsm->dup());
+            messageCount += 1;
+            printf("Node Id: %d Count: %d\n", myId, messageCount);
+        }
 
     }
-    else if (psc_cat == "Info") {
-        if (psc_type == "Weather") { // can check here for benign Info updates
 
-            //printf("%s %s\n", psc_cat.c_str(), psc_type.c_str());
+    // Basic Info message
+    else if (psc_cat == "Info") {
+        if (psc_type == "Weather") {
 
             std::string thisData = wsm->getWsmData();
             std::string data_sender = thisData.substr(0, thisData.find(delimiter1));
@@ -185,27 +183,28 @@ void ART::onWSM(WaveShortMessage* wsm) {
             std::string road_id = data_road.substr(data_road.find(delimiter2) + 2, data_road.length()-(dataField2.length()-2));
             std::string state_weather = data_state.substr(data_state.find(delimiter2) + 2, data_state.length()-(dataField3.length()-2));
 
-            // Check if you can verify the new message
-            // If you can, verify whether it is true
-            updateMatrix(std::stoi(sender_id), true, true); // Assumes all incoming messages are True
-            //printf("%s says %s at %s \n", sender_id.c_str(), state_weather.c_str(), road_id.c_str());
+            // This is where the truth of the message could be checked with vehicle sensors (not implemented)
+
+            // Assume all information is verifiable and true
+            updateMatrix(std::stoi(sender_id), true, true);
         }
 
+        // External Trust Matrix
         else if (psc_type == "Trust") {
-            //printf("This is a Trust Matrix message\n");
+
             std::map<int, OutsideOpinion> recievedMap;
 
             //Pull out data string and pass to function to parse
             std::string thisData = wsm->getWsmData();
             parseTrust(thisData);
-
         }
     }
-    else {
-        //printf("Unrecognized message: %s %s \n", psc_cat.c_str(), psc_type.c_str());
-    }
+
 }
 
+// Used to draw a random sample from a normal distribution with
+// specified mean and sigma
+// Utilized by final "reroute" decision
 double ART::getSample(float mean, float sigma){
 
     std::normal_distribution<double> distribution(mean, sigma);
@@ -219,8 +218,7 @@ void ART::handleSelfMsg(cMessage* msg) {
         //this code only runs when channel switching is enabled
         sendDown(wsm->dup());
         wsm->setSerial(wsm->getSerial() +1);
-        //messageCount += 1;
-        //printf("Node Id: %d Count: %d\n", myId, messageCount);
+
         if (wsm->getSerial() >= 3) {
             //stop service advertisements
             stopService();
@@ -238,7 +236,9 @@ void ART::handleSelfMsg(cMessage* msg) {
 
 void ART::handlePositionUpdate(cObject* obj) {
     BaseWaveApplLayer::handlePositionUpdate(obj);
-    if (timeFromTrustUpdate % 60 == trustUpdateTime) { // Used to be mod 60
+
+    // Send internal trust matrix out to other vehicles at offset every minute
+    if (timeFromTrustUpdate % 60 == trustUpdateTime) {
         timeFromTrustUpdate = trustUpdateTime + 1;
 
         //Just to make sure that data is being pulled correctly
@@ -249,24 +249,22 @@ void ART::handlePositionUpdate(cObject* obj) {
         wsm->setPsc(infoTrust.c_str());
         wsm->setWsmData(data.c_str());
         messageCount += 1;
-        printf("Node Id: %d Count: %d\n", myId, messageCount);
 
         if (dataOnSch){
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
             scheduleAt(computeAsynchronousSendingTime(1,type_SCH),wsm);
-
         }
         else {
             //send right away on CCH, because channel switching is disabled
             sendDown(wsm);
         }
-        //printf("Node: %d Data: %s\n", myId, data.c_str());
     }
     else {
             timeFromTrustUpdate ++;
     }
 
+    // Send basic weather info message every 30 seconds
     if (timeFromMessage >= 30) {
         timeFromMessage = 0;
 
@@ -276,9 +274,7 @@ void ART::handlePositionUpdate(cObject* obj) {
         std::string filler = dataField1 + std::to_string(myId) + dataField2 + (mobility->getRoadId().c_str()) + dataField3 + ("rain");
         wsm->setWsmData(filler.c_str());
         messageCount += 1;
-        printf("Node Id: %d Count: %d\n", myId, messageCount);
 
-        //host is standing still due to crash
         if (dataOnSch) {
             startService(Channels::SCH2, 42, "Traffic Information Service");
             //started service and server advertising, schedule message to self to send later
@@ -294,6 +290,7 @@ void ART::handlePositionUpdate(cObject* obj) {
         timeFromMessage ++;
     }
 
+    // Process received external opinion information at offset every minute
     if (timeFromUpdate % 60 == updateTime) {
 
         // Perform Processing
@@ -305,7 +302,6 @@ void ART::handlePositionUpdate(cObject* obj) {
         while (left > 0 ) {
             Backlog current = toProcess.front();
             outsideIter = outOpinionMap.find(current.subjectId);
-            //printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, current.foreignBelief, current.foreignPlaus);
 
             if (outsideIter == outOpinionMap.end()) {
                 // new entry
@@ -318,21 +314,18 @@ void ART::handlePositionUpdate(cObject* obj) {
             else {
                 // update existing entry
                 OutsideOpinion oldOp = outsideIter->second;
-                //printf("Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, oldOp.outBelief, oldOp.outPlaus);
 
                 OutsideOpinion newOp;
                 newOp.outBelief = ((oldOp.outBelief * oldOp.contributors) + current.foreignBelief) / (oldOp.contributors + 1);
                 newOp.outPlaus = ((oldOp.outPlaus * oldOp.contributors) + current.foreignPlaus) / (oldOp.contributors + 1);
                 newOp.contributors = oldOp.contributors + 1;
                 outsideIter->second = newOp;
-                //printf("Updated Node: %d Node_Info: %d Belief: %f Plaus: %f\n", myId, current.subjectId, newOp.outBelief, newOp.outPlaus);
-
             }
 
             // pop it
             toProcess.pop();
 
-            // decrease left
+            // decrease count of how many are left to process
             left --;
         }
 
@@ -347,7 +340,6 @@ void ART::handlePositionUpdate(cObject* obj) {
         if (simTime() - lastDroveAt >= 10) {
 
             if (sentMessage == false) {
-                //printf("%d prepping accident message \n", myId);
                 findHost()->getDisplayString().updateWith("r=16,red");
                 sentMessage = true;
 
@@ -377,15 +369,14 @@ void ART::handlePositionUpdate(cObject* obj) {
     else {
         lastDroveAt = simTime();
         // no crash - check for trigger for fake crash
-        //printf("%d about to send accident message \n", myId);
         if (mobility->getFakeState() == 1 && !sentFakeMessage){
             printf("%d prepping accident message \n", myId);
 
-            findHost()->getDisplayString().updateWith("r=16,blue"); //What is this actually changing?
-            sentMessage = true; // JAMIE: should we do this, or set getFakeState to 0?
+            findHost()->getDisplayString().updateWith("r=16,blue");
+            sentMessage = true;
             sentFakeMessage = true;
             attackStarted = true;
-            attackPosition = mobility->getSavedRoadId();
+            attackPosition = (mobility->getSavedRoadId());
 
             WaveShortMessage* wsm = new WaveShortMessage();
             populateWSM(wsm);
@@ -396,7 +387,6 @@ void ART::handlePositionUpdate(cObject* obj) {
             messageCount += 1;
             printf("Node Id: %d Count: %d\n", myId, messageCount);
 
-            // I have no idea what this means
             if (dataOnSch) {
                 startService(Channels::SCH2, 42, "Traffic Information Service");
                 //started service and server advertising, schedule message to self to send later
@@ -411,6 +401,7 @@ void ART::handlePositionUpdate(cObject* obj) {
     }
 }
 
+// Function to update the internal trust matrix with new information in the appropriate way
 // Checkable denotes whether we personally could see if the data was True or False
 // If the data was checkable, Verified denotes whether it was successfully verified as True
 void ART::updateMatrix(int nodeId, bool checkable, bool verified){
@@ -421,49 +412,23 @@ void ART::updateMatrix(int nodeId, bool checkable, bool verified){
     else {
         modifyEntry(nodeId, checkable, verified);
     }
-
-    //for (auto it = trustMap.cbegin(); it != trustMap.cend(); it++) {
-        //std::cout << "Vehicle " << myId << ": Key: " << (it->first) << "; Belief: " << (it->second.dataBelief) << "; Plausibility: " << (it->second.dataPlausibility) << "\n";
-    //}
 }
 
+// Add new item into internal trust matrix
+// Used when we come across a new car we haven't heard from
+// Checkable and Verified not currently used
+// Random starter values set for Belief and Plausibility at start of simulation
 void ART::addEntry(int nodeId, bool checkable, bool verified){
 
     Trust temp;
-    //temp.dataTrust = (float)((rand()%20)+80)/100;
 
-    //temp.numMessages = 5;
-    //temp.numTrue = 1;
-    //temp.numFalse = 2;
-
-    // To be used if we implement a different mode of "hand waving" initialization
-    /*
-    temp.numMessages = 1;
-
-    if (checkable) {
-        if (verified) {
-            temp.numTrue = 1;
-            temp.numFalse = 0;
-        }
-        else {
-            temp.numTrue = 0;
-            temp.numFalse = 1;
-        }
-    }
-    else {
-        temp.numTrue = 0;
-        temp.numFalse = 0;
-    }
-    */
-
-    //temp.dataBelief = temp.numTrue/temp.numMessages;
-    //temp.dataPlausibility = 1 - temp.numFalse/temp.numMessages;
     temp.dataBelief = (float)((rand() % 20) + 10)/100;
     temp.dataPlausibility = (float)((rand() % 10) + 90)/100;
-    printf("%f %f", temp.dataBelief, temp.dataPlausibility);
+
     trustMap[nodeId] = temp;
 }
 
+// Modify an existing entry in the trust matrix
 void ART::modifyEntry(int nodeId, bool checkable, bool verified){
     Trust myStruct = trustMap[nodeId];
     float count = ++ myStruct.numMessages;
@@ -484,21 +449,18 @@ void ART::modifyEntry(int nodeId, bool checkable, bool verified){
 
     myStruct.dataPlausibility = pls;
     myStruct.dataBelief = bel;
-    //printf("New values: %f messages sent; %f true; %f false; %f belief; %f plaus\n",
-    //        myStruct.numMessages, myStruct.numTrue, myStruct.numFalse, myStruct.dataBelief, myStruct.dataPlausibility);
     trustMap[nodeId] = myStruct;
 }
 
+// Parse the data in a Trust Matrix message
+// Add entry to external opinion queue
 void ART::parseTrust(std::string data){
-    //Put the trust details into the map
 
     std::string nodeId;
     std::string belString;
     std::string plsString;
     int messageId;
 
-    // = data.substr(0, thisPSC.find(delimiter1));
-    //= data.substr(thisPSC.find(delimiter1) + 2, thisPSC.length() - psc_cat.length() - 2);
     size_t data_pos = 0;
     size_t entry_pos = 0;
     std::string entry;
@@ -522,7 +484,7 @@ void ART::parseTrust(std::string data){
 
         data.erase(0, data_pos + delimiter1.length());
 
-        //Enter data into the map
+        //Enter data into the queue
         Backlog newEntry;
         newEntry.subjectId = stoi(nodeId);
         newEntry.foreignBelief = stof(belString);
@@ -533,8 +495,8 @@ void ART::parseTrust(std::string data){
 
 }
 
+// Iterate through internal trust matrix to serialize it for sending to other vehicles
 std::string ART::createTrustString(){
-    //Iterate through the map to create the string to pass back
 
     std::string output = "";
     output = std::to_string(accidentMessageCount) + delimiter1;

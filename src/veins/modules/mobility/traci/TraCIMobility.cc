@@ -17,6 +17,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
+// Edits made by Rachel Eaton, Alex Fulton, Jamie Thorpe
+//     To incorporate functionality for false information attack.
 
 #include <limits>
 #include <iostream>
@@ -102,15 +104,14 @@ void TraCIMobility::initialize(int stage)
 
 		isParking = false;
 
-		fakeAccidentCount = par("fakeAccidentCount");
-		fakeState = 0;
-
-
 		startAccidentMsg = 0;
 		stopAccidentMsg = 0;
 		manager = 0;
 		last_speed = -1;
 
+		// Mimic setup of true accident (Eaton, et. al)
+		fakeAccidentCount = par("fakeAccidentCount");
+        fakeState = 0;
 		startFakeAccidentMsg = 0;
 		stopFakeAccidentMsg = 0;
 
@@ -121,6 +122,9 @@ void TraCIMobility::initialize(int stage)
 			stopAccidentMsg = new cMessage("scheduledAccidentResolved");
 			scheduleAt(simTime() + accidentStart, startAccidentMsg);
 		}
+
+		// Mimic true accident functionality
+		// Set a fake accident location to use in place of current location (Eaton, et. al)
 		if (fakeAccidentCount > 0){
 			simtime_t fakeAccidentStart = par("fakeAccidentStart");
 			startFakeAccidentMsg = new cMessage("scheduledFakeAccident");
@@ -148,6 +152,8 @@ void TraCIMobility::finish()
 
 	cancelAndDelete(startAccidentMsg);
 	cancelAndDelete(stopAccidentMsg);
+
+	// Mimic setup of true accident (Eaton, et. al)
     cancelAndDelete(startFakeAccidentMsg);
 	cancelAndDelete(stopFakeAccidentMsg);
 
@@ -169,9 +175,10 @@ void TraCIMobility::handleSelfMsg(cMessage *msg)
 			scheduleAt(simTime() + accidentInterval, startAccidentMsg);
 		}
 	}
+
+	// Fake message functionality to mimic that of true accidents (Eaton et. al)
 	else if(msg == startFakeAccidentMsg) {
-		//Need some good way to trigger the messages being sent
-		this->savedRoadId = fake_accident_location; //this->road_id;
+		this->savedRoadId = fake_accident_location;
 		fakeState = 1;
 		simtime_t fakeAccidentDuration = par("fakeAccidentDuration");
 		scheduleAt(simTime() + fakeAccidentDuration, stopFakeAccidentMsg);
